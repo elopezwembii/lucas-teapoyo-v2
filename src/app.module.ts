@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
       dbName: process.env.DATABASE_NAME,
     }),
     ChatbotModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
