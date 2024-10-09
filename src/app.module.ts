@@ -43,6 +43,7 @@ import { UserRole } from './shared/entities/user-role.entity';
 import { UserTest } from './shared/entities/user-test.entity';
 import { Users } from './shared/entities/users.entity';
 import { Notification } from './shared/entities/notification.entity';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -100,6 +101,7 @@ import { Notification } from './shared/entities/notification.entity';
     ChatbotModule,
     MailerModule,
     SharedModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
