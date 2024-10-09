@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
@@ -95,37 +96,63 @@ export class SubscriptionsService {
   }
 
   async findOne(id: number) {
-    return await this.repository.findOne({ where: { id } });
+    if (!id) throw new BadRequestException('Id es requerido.');
+    const subscriptionExists = await this.repository.findOne({ where: { id } });
+    if (!subscriptionExists) {
+      throw new NotFoundException('La subscripción no existe.');
+    }
+    return subscriptionExists;
   }
 
   async update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
-    const updated = await this.repository.update(id, {
-      frequency: updateSubscriptionDto.auto_recurring.frequency,
-      frequency_type: updateSubscriptionDto.auto_recurring.frequency_type,
-      repetitions: updateSubscriptionDto.auto_recurring.repetitions,
-      billing_day: updateSubscriptionDto.auto_recurring.billing_day,
-      billing_day_proportional: false,
-      frequency_free: updateSubscriptionDto.auto_recurring.free_trial.frequency,
-      frequency_type_free:
-        updateSubscriptionDto.auto_recurring.free_trial.frequency_type,
-      first_invoice_offset:
-        updateSubscriptionDto.auto_recurring.free_trial.first_invoice_offset,
-      transaction_amount:
-        updateSubscriptionDto.auto_recurring.transaction_amount,
-      currency_id: Currency.CLP,
-      cupon: updateSubscriptionDto.coupon,
-      percentage: updateSubscriptionDto.percentage,
-      state_cupon: updateSubscriptionDto.state_cupon,
-      reason: updateSubscriptionDto.reason,
-      empresa_id: updateSubscriptionDto.enterpriseId,
-      tipo: updateSubscriptionDto.type,
-      promo: updateSubscriptionDto.promo,
-      status: updateSubscriptionDto.status,
-    });
-    if (updated.affected) return await this.findOne(id);
+    if (!id) throw new BadRequestException('Id es requerido.');
+    if (!Object.keys(updateSubscriptionDto).length) {
+      throw new BadRequestException(
+        'Debes aportar al menos un campo editable.',
+      );
+    }
+    const subscriptionExists = await this.findOne(id);
+    if (!subscriptionExists) {
+      throw new NotFoundException('La subscripción no existe.');
+    }
+    try {
+      const updated = await this.repository.update(id, {
+        frequency: updateSubscriptionDto.auto_recurring.frequency,
+        frequency_type: updateSubscriptionDto.auto_recurring.frequency_type,
+        repetitions: updateSubscriptionDto.auto_recurring.repetitions,
+        billing_day: updateSubscriptionDto.auto_recurring.billing_day,
+        billing_day_proportional: false,
+        frequency_free:
+          updateSubscriptionDto.auto_recurring.free_trial.frequency,
+        frequency_type_free:
+          updateSubscriptionDto.auto_recurring.free_trial.frequency_type,
+        first_invoice_offset:
+          updateSubscriptionDto.auto_recurring.free_trial.first_invoice_offset,
+        transaction_amount:
+          updateSubscriptionDto.auto_recurring.transaction_amount,
+        currency_id: Currency.CLP,
+        cupon: updateSubscriptionDto.coupon,
+        percentage: updateSubscriptionDto.percentage,
+        state_cupon: updateSubscriptionDto.state_cupon,
+        reason: updateSubscriptionDto.reason,
+        empresa_id: updateSubscriptionDto.enterpriseId,
+        tipo: updateSubscriptionDto.type,
+        promo: updateSubscriptionDto.promo,
+        status: updateSubscriptionDto.status,
+      });
+      if (updated.affected) return await this.findOne(id);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async remove(id: number) {
-    return await this.repository.delete(id);
+    if (!id) throw new BadRequestException('Id es requerido.');
+    const subscriptionExists = await this.findOne(id);
+    if (!subscriptionExists) {
+      throw new NotFoundException('La subscripción no existe.');
+    }
+    const result = await this.repository.delete(id);
+    if (result.affected == 1) return { success: true };
   }
 }
