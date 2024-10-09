@@ -13,6 +13,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Chatbot } from './entities/chatbot.entity';
 import { CreateChatbotDto } from './dto/create-chatbot.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/shared/entities/user.entity';
+import { Repository } from 'typeorm';
+import { Budget } from 'src/shared/entities/budget.entity';
 const https = require('https');
 
 @Injectable()
@@ -22,7 +26,13 @@ export class ChatbotService {
     private readonly configService: ConfigService,
     @InjectModel(Chatbot.name, 'general')
     private readonly chatBotModel: Model<Chatbot>,
+    @InjectRepository(Budget)
+    private repository: Repository<Budget>,
   ) {}
+
+  async test() {
+    return await this.repository.find();
+  }
   async ask(
     { question, userId, year, month }: CreateChatbotDto,
     token: string,

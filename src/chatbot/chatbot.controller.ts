@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Query, Res } from '@nestjs/common';
+import { Controller, Post, Body, Req, Query, Res, Get } from '@nestjs/common';
 import { ChatbotService } from './chatbot.service';
 import { CreateChatbotDto } from './dto/create-chatbot.dto';
 import { Request, Response } from 'express';
@@ -18,5 +18,9 @@ export class ChatbotController {
       req.headers['authorization'],
     );
     return res.status(200).json(response);
+  }
+  @Get("test")
+  get(){
+    return this.chatbotService.test();
   }
 }
