@@ -44,6 +44,7 @@ import { UserTest } from './shared/entities/user-test.entity';
 import { Users } from './shared/entities/users.entity';
 import { Notification } from './shared/entities/notification.entity';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -102,6 +103,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     MailerModule,
     SharedModule,
     SubscriptionsModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
