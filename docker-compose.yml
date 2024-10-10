@@ -1,0 +1,53 @@
+services:
+  app:
+    image: node:latest
+    working_dir: /usr/src/app
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - '${PORT}:5040'
+    environment:
+      - PORT=${PORT}
+      - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MAIN_API_URL=${MAIN_API_URL}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MERCADO_PAGO_ACCESS_TOKEN=${MERCADO_PAGO_ACCESS_TOKEN}
+      - MERCADO_PAGO_BACK_URL=${MERCADO_PAGO_BACK_URL}
+      - SUBSCRIPTION_SUCCESS_URL=${SUBSCRIPTION_SUCCESS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    command: npm run start:dev
+    depends_on:
+      - db
+      - mongo
+  db:
+    image: mysql:latest
+    container_name: 'teapoyo-mysql'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+
+  mongo:
+    image: mongo:latest
+    container_name: 'teapoyo-mongo'
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  db_data:
+  mongo_data:
