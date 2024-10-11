@@ -45,6 +45,7 @@ import { Users } from './shared/entities/users.entity';
 import { Notification } from './shared/entities/notification.entity';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { JobsModule } from './jobs/jobs.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -104,6 +105,7 @@ import { JobsModule } from './jobs/jobs.module';
     SharedModule,
     SubscriptionsModule,
     JobsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
