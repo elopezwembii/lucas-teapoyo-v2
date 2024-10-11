@@ -8,6 +8,7 @@ import { Chatbot, ChatbotSchema } from './entities/chatbot.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/shared/entities/user.entity';
 import { Budget } from 'src/shared/entities/budget.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [ChatbotController],
@@ -15,6 +16,7 @@ import { Budget } from 'src/shared/entities/budget.entity';
   imports: [
     TypeOrmModule.forFeature([Budget]),
     ConfigModule,
+    AuthModule,
     MongooseModule.forFeature(
       [
         {

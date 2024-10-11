@@ -13,6 +13,7 @@ import { ChatbotService } from './chatbot.service';
 import { CreateChatbotDto } from './dto/create-chatbot.dto';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { jwtDecode } from 'jwt-decode';
 
 @Controller('chatbot')
 export class ChatbotController {
@@ -27,9 +28,8 @@ export class ChatbotController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const token = await this.jwtService.verifyAsync(
-      req.headers['authorization'],
-    );
+    const token = jwtDecode(req.headers['authorization']);
+    console.log({ token });
     if (!token) throw new UnauthorizedException('Token inválido');
 
     const response = await this.chatbotService.ask(
