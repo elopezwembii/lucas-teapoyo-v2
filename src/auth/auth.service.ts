@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
+import { CreateIntegrationDto } from './dto/create-integration.dto';
+import { IntegrationService } from './integration.service';
+import { UpdateIntegrationDto } from './dto/update-integration.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(readonly jwtService: JwtService) {}
+  constructor(private readonly integrationService: IntegrationService) {}
 
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  async create(createAuthDto: CreateIntegrationDto) {
+    return await this.integrationService.create(createAuthDto);
   }
 
   findAll() {
@@ -20,7 +22,7 @@ export class AuthService {
     return `This action returns a #${id} auth`;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
+  update(id: number, updateAuthDto: UpdateIntegrationDto) {
     return `This action updates a #${id} auth`;
   }
 
