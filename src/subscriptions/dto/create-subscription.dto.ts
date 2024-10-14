@@ -9,9 +9,8 @@ import {
 } from 'class-validator';
 
 enum FrequencyType {
-  Monthly = 'monthly',
-  Dayly = 'dayly',
-  Weekly = 'weekly',
+  Months = 'months',
+  Days = 'days',
 }
 
 class FreeTrialDto {
