@@ -27,6 +27,7 @@ export class JobsService {
   ) {}
   private async sendNotification(emailData: SendEmailDto) {
     return await this.mailerService.sendEmail(emailData);
+    
   }
 
   @Cron('0 0 1 * *')
