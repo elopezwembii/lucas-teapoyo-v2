@@ -19,7 +19,7 @@ import { SubscribeSuccessDto } from './dto/subscribe-success-query.dto';
 export class SubscriptionsService {
   client: MercadoPagoConfig;
   subscription: PreApprovalPlan;
-  ƒ;
+
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(Plan)
