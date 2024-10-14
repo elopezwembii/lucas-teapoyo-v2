@@ -28,6 +28,7 @@ import { JwtModule } from '@nestjs/jwt';
       ],
       'general',
     ),
+    JwtModule,
   ],
 })
 export class ChatbotModule {}
