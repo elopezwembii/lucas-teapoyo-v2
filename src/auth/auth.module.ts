@@ -7,12 +7,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET || '',
+      secret: process.env.JWT_SECRET || 'secretKey',
       signOptions: { expiresIn: '60s' },
     }),
   ],
   providers: [AuthService, JwtStrategy],
-  exports:[],
   controllers: [AuthController],
 })
 export class AuthModule {}
