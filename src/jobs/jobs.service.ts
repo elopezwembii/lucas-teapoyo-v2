@@ -122,7 +122,6 @@ export class JobsService {
       }
     }
 
-    // Esperar a que se envíen todas las notificaciones
     await Promise.all(notifications);
   }
 }
