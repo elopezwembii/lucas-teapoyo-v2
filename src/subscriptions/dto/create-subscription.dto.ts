@@ -57,6 +57,7 @@ export class CreateSubscriptionDto {
   coupon?: string;
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   percentage: number;
 
   @IsNumber()
