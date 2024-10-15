@@ -35,5 +35,5 @@ export class CreateBudgetDto {
   @IsOptional()
   @IsNumber()
   @IsPositive()
-  itemId?: number;
+  items?: number[];
 }

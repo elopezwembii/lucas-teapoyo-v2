@@ -81,7 +81,7 @@ export class BudgetsService {
       previousMonth,
       previousYear,
       userId,
-      itemId,
+      items,
     } = createBudgetDto;
 
     const currentBudget = await this.budgetRepository.findOne({
@@ -113,16 +113,22 @@ export class BudgetsService {
       return { message: false };
     }
 
-    const itemToReplicate = await this.budgetItemRepository.findOne({
-      where: { id: itemId, presupuesto: { id: lastBudget.id } },
-    });
+    const itemsToReplicatePromises = items.map(
+      async (itemId) =>
+        await this.budgetItemRepository.findOne({
+          where: { id: itemId, presupuesto: { id: lastBudget.id } },
+        }),
+    );
+    const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
+    if (itemsToReplicate.length) {
+      itemsToReplicate.forEach((itemToReplicate) =>
+        this.budgetItemRepository.save({
+          monto: itemToReplicate.monto,
+          tipo_gasto: itemToReplicate.tipoGasto,
+          id_presupuesto: currentBudget.id,
+        }),
+      );
 
-    if (itemToReplicate) {
-      this.budgetItemRepository.save({
-        monto: itemToReplicate.monto,
-        tipo_gasto: itemToReplicate.tipoGasto,
-        id_presupuesto: currentBudget.id,
-      });
       currentBudget.fijado = 1;
       await this.budgetRepository.save(currentBudget);
 
