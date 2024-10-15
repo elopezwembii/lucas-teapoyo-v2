@@ -10,6 +10,7 @@ import { EmailType } from 'src/mailer/types/email.type';
 import { Budget } from 'src/shared/entities/budget.entity';
 import { BudgetItem } from 'src/shared/entities/budget-item.entity';
 import { Income } from 'src/shared/entities/income.entity';
+import { PaymentNotificationsService } from '../payment-notifications/payment-notifications.service';
 
 @Injectable()
 export class JobsService {
@@ -24,10 +25,10 @@ export class JobsService {
     private budgetItemRepository: Repository<BudgetItem>,
     @InjectRepository(Income)
     private incomeRepository: Repository<Income>,
+    private readonly paymentNotificationsService: PaymentNotificationsService,
   ) {}
   private async sendNotification(emailData: SendEmailDto) {
     return await this.mailerService.sendEmail(emailData);
-    
   }
 
   @Cron('0 0 1 * *')
@@ -82,6 +83,27 @@ export class JobsService {
         type: EmailType.REMINDER_BUDGET_EMAIL,
       });
     });
+  }
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  async sendPaymentNotifications() {
+    const paymentNotifications =
+      await this.paymentNotificationsService.findAll();
+
+    for (const paymentNotification of paymentNotifications) {
+      const budgetItems = await this.budgetItemRepository.find({
+        where: { id: paymentNotification.recurrentItemId },
+      });
+      const user = await this.userRepository.findOne({
+        where: { id: paymentNotification.userId },
+      });
+
+      this.sendNotification({
+        from: this.configService.get('ROOT_EMAIL_DOMAIN'),
+        subject: '¡Es hora de pagar las cuentas!',
+        to: user.email,
+        type: EmailType.PAYMENT_NOTIFICATION_EMAIL,
+      });
+    }
   }
   @Cron(CronExpression.EVERY_DAY_AT_3PM)
   async checkBudgets() {

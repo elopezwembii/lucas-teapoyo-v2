@@ -9,6 +9,7 @@ import { Budget } from 'src/shared/entities/budget.entity';
 import { BudgetItem } from 'src/shared/entities/budget-item.entity';
 import { Income } from 'src/shared/entities/income.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { PaymentNotificationsModule } from 'src/payment-notifications/payment-notifications.module';
 
 @Module({
   providers: [JobsService],
@@ -21,6 +22,7 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule,
     ConfigModule,
     MailerModule,
+    PaymentNotificationsModule,
   ],
 })
 export class JobsModule {}

@@ -46,6 +46,7 @@ import { Notification } from './shared/entities/notification.entity';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { JobsModule } from './jobs/jobs.module';
 import { AuthModule } from './auth/auth.module';
+import { PaymentNotificationsModule } from './payment-notifications/payment-notifications.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { AuthModule } from './auth/auth.module';
     SubscriptionsModule,
     JobsModule,
     AuthModule,
+    PaymentNotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
