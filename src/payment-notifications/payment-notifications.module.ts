@@ -6,11 +6,13 @@ import {
   PaymentNotification,
   PaymentNotificationSchema,
 } from './entities/payment-notification.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [PaymentNotificationsController],
   providers: [PaymentNotificationsService],
   imports: [
+    AuthModule,
     MongooseModule.forFeature(
       [
         {

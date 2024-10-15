@@ -6,11 +6,13 @@ import { Budget } from 'src/shared/entities/budget.entity';
 import { BudgetItem } from 'src/shared/entities/budget-item.entity';
 import { Income } from 'src/shared/entities/income.entity';
 import { User } from 'src/shared/entities/user.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [BudgetsController],
   providers: [BudgetsService],
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Budget]),
     TypeOrmModule.forFeature([BudgetItem]),
