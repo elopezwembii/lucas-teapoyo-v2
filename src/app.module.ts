@@ -47,6 +47,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { JobsModule } from './jobs/jobs.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentNotificationsModule } from './payment-notifications/payment-notifications.module';
+import { BudgetsModule } from './budgets/budgets.module';
 
 @Module({
   imports: [
@@ -108,6 +109,7 @@ import { PaymentNotificationsModule } from './payment-notifications/payment-noti
     JobsModule,
     AuthModule,
     PaymentNotificationsModule,
+    BudgetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
