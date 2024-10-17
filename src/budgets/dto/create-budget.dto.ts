@@ -32,7 +32,7 @@ export class CreateBudgetDto {
   @IsNumber()
   @IsPositive()
   userId: number;
-
+  @IsOptional()
   @IsArray()
   items?: number[];
 }

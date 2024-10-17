@@ -40,7 +40,6 @@ export class BudgetsService {
         anio: previousYear,
         usuario: { id: userId },
       },
-      relations: ['items'],
     });
 
     if (!currentBudget) {
@@ -52,26 +51,27 @@ export class BudgetsService {
     }
 
     if (currentBudget.fijado === 1) {
-      return { message: false };
+      throw new NotFoundException({ message: false });
     }
-
     const lastBudgetItems = await this.budgetItemRepository.find({
-      where: { presupuesto: { id: lastBudget.id } },
+      where: {
+        idPresupuesto: lastBudget.id,
+      },
+      relations: ['tipoGasto'],
     });
     if (lastBudgetItems.length > 0) {
-      for (const item of lastBudgetItems) {
-        this.budgetItemRepository.save({
+       lastBudgetItems.forEach(async(item)=>await this.budgetItemRepository.save({
           monto: item.monto,
           tipo_gasto: item.tipoGasto,
           id_presupuesto: currentBudget.id,
-        });
-      }
+        }));
+      
       currentBudget.fijado = 1;
       await this.budgetRepository.save(currentBudget);
 
       return { message: 'Presupuesto clonado del mes anterior' };
     } else {
-      return { message: false };
+      throw new NotFoundException({ message: false });
     }
   }
   async replicateByItem(createBudgetDto: CreateBudgetDto) {
@@ -98,7 +98,6 @@ export class BudgetsService {
         anio: previousYear,
         usuario: { id: userId },
       },
-      relations: ['items'],
     });
 
     if (!currentBudget) {
@@ -109,32 +108,31 @@ export class BudgetsService {
       throw new NotFoundException('Presupuesto anterior no encontrado.');
     }
 
-    if (currentBudget.fijado === 1) {
-      return { message: false };
-    }
-
-    const itemsToReplicatePromises = items.map(
-      async (itemId) =>
-        await this.budgetItemRepository.findOne({
-          where: { id: itemId, presupuesto: { id: lastBudget.id } },
-        }),
+    const itemsToReplicatePromises = items.map(async (itemId) =>
+      this.budgetItemRepository.findOne({
+        where: { id: itemId },
+        relations: ['tipoGasto'],
+      }),
     );
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
+
     if (itemsToReplicate.length) {
-      itemsToReplicate.forEach((itemToReplicate) =>
-        this.budgetItemRepository.save({
-          monto: itemToReplicate.monto,
-          tipo_gasto: itemToReplicate.tipoGasto,
-          id_presupuesto: currentBudget.id,
-        }),
-      );
+      for (const itemToReplicate of itemsToReplicate) {
+        if (itemToReplicate) {
+          await this.budgetItemRepository.save({
+            monto: itemToReplicate.monto,
+            tipoGasto: { id: itemToReplicate.tipoGasto.id },
+            presupuesto: { id: currentBudget.id },
+          });
+        }
+      }
 
       currentBudget.fijado = 1;
       await this.budgetRepository.save(currentBudget);
 
       return { message: 'Item de Presupuesto clonado del mes anterior' };
-    } else {
-      return { message: false };
     }
+
+    throw new NotFoundException('No hay items para replicar');
   }
 }

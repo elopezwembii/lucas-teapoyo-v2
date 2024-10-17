@@ -2,8 +2,6 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -19,10 +17,13 @@ export class BudgetItem {
   monto: number;
 
   @ManyToOne(() => Budget)
-  @JoinColumn({ name: 'id_presupuesto' })
+  @JoinColumn({ name: 'id_presupuesto' }) 
   presupuesto: Budget;
 
   @ManyToOne(() => SpendType)
   @JoinColumn({ name: 'tipo_gasto' })
   tipoGasto: SpendType;
+
+  @Column({ name: 'id_presupuesto', type: 'int' })
+  idPresupuesto: number; 
 }

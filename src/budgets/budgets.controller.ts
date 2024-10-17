@@ -24,6 +24,6 @@ export class BudgetsController {
   @Post('replicate-only')
   @Protected()
   replicateOnly(@Body() createBudgetDto: CreateBudgetDto) {
-    return this.budgetsService.replicateBudget(createBudgetDto);
+    return this.budgetsService.replicateByItem(createBudgetDto);
   }
 }
