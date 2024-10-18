@@ -92,6 +92,7 @@ export class BudgetsService {
       items,
     } = createBudgetDto;
 
+    // Busca el presupuesto actual
     const currentBudget = await this.budgetRepository.findOne({
       where: {
         mes: currentMonth,
@@ -100,6 +101,7 @@ export class BudgetsService {
       },
     });
 
+    // Busca el presupuesto anterior
     const lastBudget = await this.budgetRepository.findOne({
       where: {
         mes: previousMonth,
@@ -116,6 +118,7 @@ export class BudgetsService {
       throw new NotFoundException('Presupuesto anterior no encontrado.');
     }
 
+    // Busca los items a replicar
     const itemsToReplicatePromises = items.map(async (itemId) =>
       this.budgetItemRepository.findOne({
         where: { id: itemId },
@@ -125,30 +128,36 @@ export class BudgetsService {
 
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
 
-    if (itemsToReplicate.length) {
-      const budgetItemsToSave = []; // Arreglo para almacenar los items a guardar
-
-      for (const itemToReplicate of itemsToReplicate) {
-        if (itemToReplicate) {
-          const newItem = this.budgetItemRepository.create({
-            monto: itemToReplicate.monto,
-            tipoGasto: { id: itemToReplicate.tipoGasto.id },
-            presupuesto: { id: currentBudget.id },
-          });
-          budgetItemsToSave.push(newItem); // Agregar a la lista de items a guardar
-        }
-      }
-
-      if (budgetItemsToSave.length > 0) {
-        await this.budgetItemRepository.save(budgetItemsToSave); // Guardar todos los items de una vez
-      }
-
-      currentBudget.fijado = 1;
-      await this.budgetRepository.save(currentBudget); // Guardar el presupuesto actualizado
-
-      return { message: 'Items de presupuesto clonados del mes anterior' };
+    if (
+      itemsToReplicate.length === 0 ||
+      itemsToReplicate.some((item) => !item)
+    ) {
+      throw new NotFoundException('No hay items válidos para replicar.');
     }
 
-    throw new NotFoundException('No hay items para replicar');
+    const budgetItemsToSave = []; // Arreglo para almacenar los items a guardar
+
+    for (const itemToReplicate of itemsToReplicate) {
+      if (itemToReplicate) {
+        const newItem = this.budgetItemRepository.create({
+          monto: itemToReplicate.monto,
+          tipoGasto: { id: itemToReplicate.tipoGasto.id },
+          presupuesto: { id: currentBudget.id },
+        });
+        budgetItemsToSave.push(newItem);
+      }
+    }
+
+    if (budgetItemsToSave.length > 0) {
+      await this.budgetItemRepository.save(budgetItemsToSave);
+    } else {
+      throw new NotFoundException('No hay items para replicar');
+    }
+
+    currentBudget.fijado = 1;
+    const updatedBudget = await this.budgetRepository.save(currentBudget);
+    console.log({ updatedBudget });
+
+    return { message: 'Items de presupuesto clonados del mes anterior' };
   }
 }
