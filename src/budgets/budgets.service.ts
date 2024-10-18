@@ -119,7 +119,7 @@ export class BudgetsService {
     if (itemsToReplicate.length) {
       for (const itemToReplicate of itemsToReplicate) {
         if (itemToReplicate) {
-          await this.budgetItemRepository.save({
+          await this.budgetItemRepository.create({
             monto: itemToReplicate.monto,
             tipoGasto: { id: itemToReplicate.tipoGasto.id },
             presupuesto: { id: currentBudget.id },
