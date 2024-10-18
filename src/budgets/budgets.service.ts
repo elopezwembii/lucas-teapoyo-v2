@@ -128,6 +128,8 @@ export class BudgetsService {
     );
 
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
+    console.log({ itemsToReplicate });
+
     if (
       itemsToReplicate.length === 0 ||
       itemsToReplicate.some((item) => !item)
@@ -155,7 +157,6 @@ export class BudgetsService {
     await this.budgetItemRepository.save(budgetItemsToSave);
     currentBudget.fijado = 1;
     const updatedBudget = await this.budgetRepository.save(currentBudget);
-    console.log({ itemsToReplicate, budgetItemsToSave });
 
     console.log({ updatedBudget });
 
