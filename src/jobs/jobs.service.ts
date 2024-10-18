@@ -233,11 +233,12 @@ export class JobsService {
   }
   @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async sendPaymentNotifications() {
+    const date = new Date();
     const paymentNotifications =
       await this.paymentNotificationsService.findAll();
 
     for (const paymentNotification of paymentNotifications) {
-      const budgetItems = await this.budgetItemRepository.find({
+      const budgetItem = await this.budgetItemRepository.findOne({
         where: { id: paymentNotification.recurrentItemId },
       });
       const user = await this.userRepository.findOne({
@@ -249,11 +250,18 @@ export class JobsService {
         subject: '¡Es hora de pagar las cuentas!',
         to: user.email,
         type: EmailType.PAYMENT_NOTIFICATION_EMAIL,
+        dynamicTemplateData: {
+          clientName: user.nombres,
+          month: date.getMonth(),
+          year: date.getFullYear(),
+          paymentAmount: budgetItem.monto,
+        },
       });
     }
   }
   @Cron(CronExpression.EVERY_DAY_AT_3PM)
   async checkBudgets() {
+    const now = new Date();
     const budgets = await this.budgetRepository.find();
     const notifications = [];
     for (const budget of budgets) {
@@ -277,6 +285,13 @@ export class JobsService {
             subject: '¡Estás llegando al 50% de tu presupuesto!',
             to: budget.usuario.email,
             type: EmailType.BUDGET_EMAIL,
+            dynamicTemplateData: {
+              clientName: budget.usuario.nombres,
+              month: now.getMonth(),
+              year: now.getFullYear(),
+              isFiftyPercentUsed: true,
+              isEightyPercentUsed: false,
+            },
           }),
         );
       } else if (currentPercent >= 80) {
@@ -286,6 +301,13 @@ export class JobsService {
             subject: '¡Estás llegando al 80% de tu presupuesto!',
             to: budget.usuario.email,
             type: EmailType.BUDGET_EMAIL,
+            dynamicTemplateData: {
+              clientName: budget.usuario.nombres,
+              month: now.getMonth(),
+              year: now.getFullYear(),
+              isFiftyPercentUsed: false,
+              isEightyPercentUsed: true,
+            },
           }),
         );
       }
