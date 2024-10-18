@@ -36,12 +36,11 @@ export class MailerService {
       case EmailType.REMINDER_BUDGET_EMAIL:
         return 'd-f473bcf2380d4f2ebdc789d4632ac211';
       case EmailType.BUDGET_EMAIL:
-        return 'LOST';
+        return 'd-c0f62d6234d94977aee21e20481bcc3d';
       case EmailType.PAYMENT_NOTIFICATION_EMAIL:
-        return 'LOST';
-
+        return 'd-c4dbee00cbf74ec8a82f36b1fb064930';
       default:
-        return '';
+        return 'Lost';
     }
   }
 }
