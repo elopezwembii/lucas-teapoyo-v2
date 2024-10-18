@@ -33,8 +33,12 @@ export class MailerService {
   }
   private retrieveTemplateId(type: EmailType) {
     switch (type) {
-      case EmailType.MARKETING_EMAIL:
-        return 'd-b5ad04d3d5f34c50b3c3e09039a911ff';
+      case EmailType.REMINDER_BUDGET_EMAIL:
+        return 'd-f473bcf2380d4f2ebdc789d4632ac211';
+      case EmailType.BUDGET_EMAIL:
+        return 'LOST';
+      case EmailType.PAYMENT_NOTIFICATION_EMAIL:
+        return 'LOST';
 
       default:
         return '';
