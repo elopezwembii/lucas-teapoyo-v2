@@ -119,11 +119,12 @@ export class BudgetsService {
     }
 
     // Busca los items a replicar
-    const itemsToReplicatePromises = items.map(async (itemId) =>
-      this.budgetItemRepository.findOne({
-        where: { id: itemId },
-        relations: ['tipoGasto'],
-      }),
+    const itemsToReplicatePromises = items.map(
+      async (itemId) =>
+        await this.budgetItemRepository.findOne({
+          where: { id: itemId },
+          relations: ['tipoGasto'],
+        }),
     );
 
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
@@ -147,12 +148,11 @@ export class BudgetsService {
       }
     }
 
-    if (budgetItemsToSave.length > 0) {
-      await this.budgetItemRepository.save(budgetItemsToSave);
-    } else {
+    if (!budgetItemsToSave.length) {
       throw new NotFoundException('No hay items para replicar');
     }
 
+    await this.budgetItemRepository.save(budgetItemsToSave);
     currentBudget.fijado = 1;
     const updatedBudget = await this.budgetRepository.save(currentBudget);
     console.log({ itemsToReplicate, budgetItemsToSave });
