@@ -9,7 +9,6 @@ import { BudgetItem } from 'src/shared/entities/budget-item.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/shared/entities/user.entity';
-import { Request } from 'express';
 
 @Injectable()
 export class BudgetsService {
@@ -70,7 +69,7 @@ export class BudgetsService {
       );
 
       currentBudget.fijado = 1;
-      await this.budgetRepository.save(currentBudget);
+      this.budgetRepository.create(currentBudget);
 
       return { message: 'Presupuesto clonado del mes anterior' };
     } else {
