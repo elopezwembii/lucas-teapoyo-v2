@@ -33,20 +33,85 @@ export class JobsService {
 
   @Cron('0 0 1 * *')
   async handleStartOfMonth() {
+    const now = new Date();
     const users = await this.userRepository.find();
+    const monthlyBudget = await this.budgetRepository.findOne({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const incomes = await this.incomeRepository.find({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const budgetTotalAmount = incomes.reduce(
+      (acc, acum) => acc + acum.montoReal,
+      0,
+    );
+    const budgetItems = await this.budgetItemRepository.find({
+      where: {
+        idPresupuesto: monthlyBudget.id,
+      },
+    });
+
+    const budgetTotalSpends = budgetItems.reduce(
+      (acc, acum) => acc + acum.monto,
+      0,
+    );
+    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
         subject: '¡Inicio de mes! Revisa tu presupuesto.',
         to: user.email,
         type: EmailType.REMINDER_BUDGET_EMAIL,
+        dynamicTemplateData: {
+          clientName: user.nombres,
+          month: now.getMonth(),
+          year: now.getFullYear(),
+          budgetTotalAmount,
+          budgetTotalSpends,
+          budgetRemaining,
+        },
       });
     });
   }
 
   @Cron('0 0 15 * *')
   async handleMidMonth() {
+    const now = new Date();
     const users = await this.userRepository.find();
+    const monthlyBudget = await this.budgetRepository.findOne({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const incomes = await this.incomeRepository.find({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const budgetTotalAmount = incomes.reduce(
+      (acc, acum) => acc + acum.montoReal,
+      0,
+    );
+    const budgetItems = await this.budgetItemRepository.find({
+      where: {
+        idPresupuesto: monthlyBudget.id,
+      },
+    });
+
+    const budgetTotalSpends = budgetItems.reduce(
+      (acc, acum) => acc + acum.monto,
+      0,
+    );
+    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
@@ -54,13 +119,50 @@ export class JobsService {
           '¡Mitad de mes! Es un buen momento para revisar tu presupuesto.',
         to: user.email,
         type: EmailType.REMINDER_BUDGET_EMAIL,
+        dynamicTemplateData: {
+          clientName: user.nombres,
+          month: now.getMonth(),
+          year: now.getFullYear(),
+          budgetTotalAmount,
+          budgetTotalSpends,
+          budgetRemaining,
+        },
       });
     });
   }
 
   @Cron('0 0 28-31 * *')
   async handleEndOfMonth() {
+    const now = new Date();
     const users = await this.userRepository.find();
+    const monthlyBudget = await this.budgetRepository.findOne({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const incomes = await this.incomeRepository.find({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const budgetTotalAmount = incomes.reduce(
+      (acc, acum) => acc + acum.montoReal,
+      0,
+    );
+    const budgetItems = await this.budgetItemRepository.find({
+      where: {
+        idPresupuesto: monthlyBudget.id,
+      },
+    });
+
+    const budgetTotalSpends = budgetItems.reduce(
+      (acc, acum) => acc + acum.monto,
+      0,
+    );
+    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
@@ -68,19 +170,64 @@ export class JobsService {
           '¡Fin de mes! Asegúrate de que tu presupuesto esté actualizado.',
         to: user.email,
         type: EmailType.REMINDER_BUDGET_EMAIL,
+        dynamicTemplateData: {
+          clientName: user.nombres,
+          month: now.getMonth(),
+          year: now.getFullYear(),
+          budgetTotalAmount,
+          budgetTotalSpends,
+          budgetRemaining,
+        },
       });
     });
   }
 
   @Interval(172800000)
   async handleEvery48Hours() {
+    const now = new Date();
     const users = await this.userRepository.find();
+    const monthlyBudget = await this.budgetRepository.findOne({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const incomes = await this.incomeRepository.find({
+      where: {
+        anio: now.getFullYear(),
+        mes: now.getMonth(),
+      },
+    });
+    const budgetTotalAmount = incomes.reduce(
+      (acc, acum) => acc + acum.montoReal,
+      0,
+    );
+    const budgetItems = await this.budgetItemRepository.find({
+      where: {
+        idPresupuesto: monthlyBudget.id,
+      },
+    });
+
+    const budgetTotalSpends = budgetItems.reduce(
+      (acc, acum) => acc + acum.monto,
+      0,
+    );
+    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
         subject: '¿Cómo va tu presupuesto? ¡No olvides revisarlo!',
         to: user.email,
         type: EmailType.REMINDER_BUDGET_EMAIL,
+        dynamicTemplateData: {
+          clientName: user.nombres,
+          month: now.getMonth(),
+          year: now.getFullYear(),
+          budgetTotalAmount,
+          budgetTotalSpends,
+          budgetRemaining,
+        },
       });
     });
   }
@@ -108,8 +255,7 @@ export class JobsService {
   @Cron(CronExpression.EVERY_DAY_AT_3PM)
   async checkBudgets() {
     const budgets = await this.budgetRepository.find();
-    const notifications = []; // Array para almacenar las promesas de envío de notificaciones
-
+    const notifications = [];
     for (const budget of budgets) {
       const budgetItems = await this.budgetItemRepository.find({
         where: { presupuesto: budget },
