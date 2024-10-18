@@ -127,7 +127,6 @@ export class BudgetsService {
     );
 
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
-
     if (
       itemsToReplicate.length === 0 ||
       itemsToReplicate.some((item) => !item)
@@ -156,6 +155,8 @@ export class BudgetsService {
 
     currentBudget.fijado = 1;
     const updatedBudget = await this.budgetRepository.save(currentBudget);
+    console.log({ itemsToReplicate, budgetItemsToSave });
+
     console.log({ updatedBudget });
 
     return { message: 'Items de presupuesto clonados del mes anterior' };
