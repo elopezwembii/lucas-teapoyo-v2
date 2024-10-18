@@ -116,23 +116,31 @@ export class BudgetsService {
         relations: ['tipoGasto'],
       }),
     );
+
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
 
     if (itemsToReplicate.length) {
+      const budgetItemsToSave = []; // Arreglo para almacenar los items a guardar
+
       for (const itemToReplicate of itemsToReplicate) {
         if (itemToReplicate) {
-          this.budgetItemRepository.create({
+          const newItem = this.budgetItemRepository.create({
             monto: itemToReplicate.monto,
             tipoGasto: { id: itemToReplicate.tipoGasto.id },
             presupuesto: { id: currentBudget.id },
           });
+          budgetItemsToSave.push(newItem); // Agregar a la lista de items a guardar
         }
       }
 
-      currentBudget.fijado = 1;
-      this.budgetRepository.create(currentBudget);
+      if (budgetItemsToSave.length > 0) {
+        await this.budgetItemRepository.save(budgetItemsToSave); // Guardar todos los items de una vez
+      }
 
-      return { message: 'Item de Presupuesto clonado del mes anterior' };
+      currentBudget.fijado = 1;
+      await this.budgetRepository.save(currentBudget); // Guardar el presupuesto actualizado
+
+      return { message: 'Items de presupuesto clonados del mes anterior' };
     }
 
     throw new NotFoundException('No hay items para replicar');
