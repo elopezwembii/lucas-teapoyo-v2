@@ -60,12 +60,15 @@ export class BudgetsService {
       relations: ['tipoGasto'],
     });
     if (lastBudgetItems.length > 0) {
-       lastBudgetItems.forEach(async(item)=>await this.budgetItemRepository.save({
-          monto: item.monto,
-          tipo_gasto: item.tipoGasto,
-          id_presupuesto: currentBudget.id,
-        }));
-      
+      lastBudgetItems.forEach(
+        async (item) =>
+          await this.budgetItemRepository.save({
+            monto: item.monto,
+            tipo_gasto: item.tipoGasto,
+            id_presupuesto: currentBudget.id,
+          }),
+      );
+
       currentBudget.fijado = 1;
       await this.budgetRepository.save(currentBudget);
 
@@ -119,7 +122,7 @@ export class BudgetsService {
     if (itemsToReplicate.length) {
       for (const itemToReplicate of itemsToReplicate) {
         if (itemToReplicate) {
-          await this.budgetItemRepository.create({
+          this.budgetItemRepository.create({
             monto: itemToReplicate.monto,
             tipoGasto: { id: itemToReplicate.tipoGasto.id },
             presupuesto: { id: currentBudget.id },
@@ -128,7 +131,7 @@ export class BudgetsService {
       }
 
       currentBudget.fijado = 1;
-      await this.budgetRepository.save(currentBudget);
+      this.budgetRepository.create(currentBudget);
 
       return { message: 'Item de Presupuesto clonado del mes anterior' };
     }
