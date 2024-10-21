@@ -10,6 +10,7 @@ import { User } from 'src/shared/entities/user.entity';
 import { Budget } from 'src/shared/entities/budget.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { BudgetsModule } from 'src/budgets/budgets.module';
 
 @Module({
   controllers: [ChatbotController],
@@ -19,6 +20,7 @@ import { JwtModule } from '@nestjs/jwt';
     ConfigModule,
     AuthModule,
     JwtModule,
+    BudgetsModule,
     MongooseModule.forFeature(
       [
         {

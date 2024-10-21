@@ -9,6 +9,8 @@ import { BudgetItem } from 'src/shared/entities/budget-item.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/shared/entities/user.entity';
+import { GetBudgetDataDto } from './dto/get-budget-data.dto';
+import { Income } from 'src/shared/entities/income.entity';
 
 @Injectable()
 export class BudgetsService {
@@ -19,8 +21,62 @@ export class BudgetsService {
     private budgetRepository: Repository<Budget>,
     @InjectRepository(BudgetItem)
     private budgetItemRepository: Repository<BudgetItem>,
+    @InjectRepository(Income)
+    private incomeRepository: Repository<Income>,
   ) {}
+  async getBudgetData(createBudgetDto: GetBudgetDataDto) {
+    let suma: number = 0;
 
+    const { userId, month, year } = createBudgetDto;
+
+    const presupuesto = await this.budgetRepository.findOne({
+      where: {
+        mes: month,
+        anio: year,
+        usuario: { id: userId },
+      },
+      relations: ['items'],
+    });
+
+    const ingresos = await this.incomeRepository.find({
+      where: {
+        usuario: { id: userId },
+        fijar: true,
+      },
+    });
+
+    ingresos.forEach((ingreso) => {
+      if (!ingreso.mesTermino) {
+        if (ingreso.anio < year) {
+          suma += ingreso.montoReal;
+        } else if (ingreso.anio === year && ingreso.mes <= month) {
+          suma += ingreso.montoReal;
+        }
+      } else {
+        if (ingreso.anio < year && ingreso.anioTermino >= year) {
+          suma += ingreso.montoReal;
+        } else if (
+          ingreso.anio === year &&
+          ingreso.mes <= month &&
+          ingreso.mesTermino >= month
+        ) {
+          suma += ingreso.montoReal;
+        }
+      }
+    });
+
+    const ingresosFijos = await this.incomeRepository.find({
+      where: {
+        usuario: { id: userId },
+        fijar: false,
+        mes: month,
+        anio: year,
+      },
+    });
+    ingresosFijos.forEach((ingreso) => (suma += ingreso.montoReal));
+
+    return { presupuesto, ingreso: suma };
+  }
   async replicateBudget(createBudgetDto: CreateBudgetDto) {
     const { currentMonth, currentYear, previousMonth, previousYear, userId } =
       createBudgetDto;
@@ -137,7 +193,7 @@ export class BudgetsService {
       throw new NotFoundException('No hay items válidos para replicar.');
     }
 
-    const budgetItemsToSave = []; // Arreglo para almacenar los items a guardar
+    const budgetItemsToSave = [];
 
     for (const itemToReplicate of itemsToReplicate) {
       if (itemToReplicate) {

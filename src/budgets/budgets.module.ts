@@ -18,5 +18,6 @@ import { AuthModule } from 'src/auth/auth.module';
     TypeOrmModule.forFeature([BudgetItem]),
     TypeOrmModule.forFeature([Income]),
   ],
+  exports:[BudgetsService]
 })
 export class BudgetsModule {}

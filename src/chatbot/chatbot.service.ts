@@ -17,6 +17,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/shared/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Budget } from 'src/shared/entities/budget.entity';
+import { BudgetsService } from '../budgets/budgets.service';
+import { GetBudgetResponse } from './interfaces/get-budget-response.interface';
+import { GetVariableSpendResponse } from './interfaces/get-variable-spends-response.interface';
+import { spendCategory } from 'src/budgets/constants/spend-category.constants';
+import { GetSavingsResponse } from './interfaces/get-savings-response.interface';
+import { savingType } from './constants/saving-type.constants';
+import { GetDebtResponse } from './interfaces/get-debt-response.interface';
+import { finantialEntities } from './constants/finantial-entitites.constants';
 const https = require('https');
 
 @Injectable()
@@ -28,6 +36,7 @@ export class ChatbotService {
     private readonly chatBotModel: Model<Chatbot>,
     @InjectRepository(Budget)
     private repository: Repository<Budget>,
+    private readonly budgetsService: BudgetsService,
   ) {}
 
   async test() {
@@ -129,14 +138,35 @@ export class ChatbotService {
     token: string,
     extraData: { month: number; year: number; userId: number },
   ) {
-    const { budget, fixedSpends, variableSpends } =
+    const { budget, fixSpends, variableSpends, debt, savings } =
       await this.retrieveBudgetData(token, extraData);
-    if (!budget && !variableSpends.length && !fixedSpends.length) {
+    if (!budget && !variableSpends.length && !fixSpends.length) {
       return `Aún no tienes gastos que pueda utilizar para analizarlos. ¡Añade gastos para darte sugerencias!`;
     }
     const insightsContext = `[Instruccion : Eres un bot llamado luca$, no te presentes, debes dar la informacion con mucha educacion y con humor utilizando emojis: ]`;
     const response = await this.openAiService.ask(
-      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Presupuesto: ${JSON.stringify(budget)} Gastos variables:${JSON.stringify(variableSpends)} Gastos fijos: ${JSON.stringify(fixedSpends)}  `,
+      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada  
+      
+      
+      Ingresos totales: $${budget.incoming} 
+      
+      Datos de Gastos totales por categoría: ${budget.items.map((item) => `${item.category}:${item.amount}`).join(',')} 
+      
+
+     Datos de Gastos variables: ${variableSpends.map((spend) => `${spend.category}:${spend.amount}`).join(',')},
+      
+      Datos decGastos fijos: ${fixSpends.map((spend) => `${spend.category}:${spend.amount}`).join(',')}
+      
+      Datos de Ahorros: ${savings.map((saving) => `Deseo: ${saving.goalDescription} Ahorro proyectado:$${saving.goalAmount} Total Ahorrado: $${saving.raised} Fecha límite ${saving.dateLimit} Tipo de ahorro: ${saving.savingType}`).join(',')}
+
+      Datos de Deudas: ${debt.map((debt) => `Deuda: ${debt.description} Deuda tomada: ${debt.pendingDebt} Total cubierto: ${debt.paidAmount} Cuotas totales:${debt.totalFees} Cuotas cubiertas: ${debt.feesPaids}  Entidad financiera: ${debt.finantialEntity} Valor de cuota:$${debt.fee} Costo real de la deuda: ${debt.totalCost}`).join(',')}
+       
+
+      Si alguna información es erronea nula o ingresa con algún error, simplemente ignorala.
+
+
+       
+       `,
     );
     return response;
   }
@@ -150,28 +180,107 @@ export class ChatbotService {
     const agent = new https.Agent({
       rejectUnauthorized: false,
     });
-    const { data: budget } = await axios.get(
+    const { data: budget } = await axios.get<GetBudgetResponse>(
       `${this.configService.get('MAIN_API_URL')}/presupuesto_por_mes?mes=${extraData.month}&anio=${extraData.year}&id_usuario=${extraData.userId}`,
       {
         headers,
         httpAgent: agent,
       },
     );
-    const { data: variableSpends } = await axios.get(
-      `${this.configService.get('MAIN_API_URL')}/gastos_variables`,
-      {
-        headers,
-        httpAgent: agent,
-      },
-    );
-    const { data: fixedSpends } = await axios.get(
+    const { data: variableSpends } = await axios.get<
+      GetVariableSpendResponse[]
+    >(`${this.configService.get('MAIN_API_URL')}/gastos_variables`, {
+      headers,
+      httpAgent: agent,
+    });
+    const { data: fixSpends } = await axios.get<GetVariableSpendResponse[]>(
       `${this.configService.get('MAIN_API_URL')}/gastos_fijos`,
       {
         headers,
         httpAgent: agent,
       },
     );
-    return { fixedSpends, variableSpends, budget };
+    const { data: savings } = await axios.get<GetSavingsResponse[]>(
+      `${this.configService.get('MAIN_API_URL')}/obtener_ahorro`,
+      {
+        headers,
+        httpAgent: agent,
+      },
+    );
+    const { data: debt } = await axios.get<GetDebtResponse[]>(
+      `${this.configService.get('MAIN_API_URL')}/obtener_deuda`,
+      {
+        headers,
+        httpAgent: agent,
+      },
+    );
+    return {
+      budget: {
+        incoming: budget.ingreso,
+
+        items: budget.presupuesto
+          .find(
+            (budget) =>
+              budget.anio === extraData.year && budget.mes === extraData.month,
+          )
+          .get_items.map((item) => ({
+            category: spendCategory[item.tipo_gasto].description,
+            amount: item.monto,
+          })),
+      },
+      debt: debt.map(
+        ({
+          desc,
+          costo_total,
+          deuda_pendiente,
+          cuotas_pagadas,
+          cuotas_totales,
+          id_banco,
+          pago_mensual,
+          dia_pago,
+        }) => ({
+          description: desc,
+          feesPaids: cuotas_pagadas,
+          totalFees: cuotas_totales,
+          fee: pago_mensual,
+          paidDay: dia_pago,
+          totalCost: costo_total,
+          pendingDebt: deuda_pendiente,
+          paidAmount:
+            cuotas_totales * pago_mensual - cuotas_pagadas * pago_mensual,
+          finantialEntity: finantialEntities[id_banco].description,
+        }),
+      ),
+      savings: savings.map(
+        ({ desc, recaudado, meta, fecha_limite, tipo_ahorro }) => ({
+          goalDescription: desc,
+          goalAmount: meta,
+          raised: recaudado,
+          dateLimit: fecha_limite,
+          savingType: savingType[tipo_ahorro].descripcion,
+        }),
+      ),
+      fixSpends: fixSpends.map(
+        ({ desc, get_sub_tipo, monto, dia, mes, anio }) => ({
+          desc,
+          category: get_sub_tipo.nombre,
+          amount: monto,
+          day: dia,
+          month: mes,
+          year: anio,
+        }),
+      ),
+      variableSpends: variableSpends.map(
+        ({ desc, get_sub_tipo, monto, dia, mes, anio }) => ({
+          desc,
+          category: get_sub_tipo.nombre,
+          amount: monto,
+          day: dia,
+          month: mes,
+          year: anio,
+        }),
+      ),
+    };
   }
   private async isThankYou(text: string) {
     const thankYouCheckContext =

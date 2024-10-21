@@ -1,0 +1,16 @@
+export const spendCategory: { [key: number]: { description: string } } = {
+  1: { description: 'Hogar' },
+  2: { description: 'Servicios básicos' },
+  3: { description: 'Alimento y comida' },
+  4: { description: 'Entretenimiento' },
+  5: { description: 'Salud y belleza' },
+  6: { description: 'Auto y transporte' },
+  7: { description: 'Educación y trabajo' },
+  8: { description: 'Regalo y ayudas' },
+  9: { description: 'Viajes' },
+  10: { description: 'Créditos' },
+  11: { description: 'Ropa y calzado' },
+  12: { description: 'Personal' },
+  13: { description: 'Compras Online' },
+  14: { description: 'Ahorro e inversiones' },
+};
