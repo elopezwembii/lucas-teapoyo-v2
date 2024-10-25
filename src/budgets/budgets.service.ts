@@ -199,7 +199,7 @@ export class BudgetsService {
       if (itemToReplicate) {
         const newItem = this.budgetItemRepository.create({
           monto: itemToReplicate.monto,
-          tipoGasto: { id: itemToReplicate.tipoGasto.id },
+          tipoGasto: { id: itemToReplicate.id },
           presupuesto: { id: currentBudget.id },
         });
         budgetItemsToSave.push(newItem);
