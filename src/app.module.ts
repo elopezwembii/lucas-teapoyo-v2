@@ -48,6 +48,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentNotificationsModule } from './payment-notifications/payment-notifications.module';
 import { BudgetsModule } from './budgets/budgets.module';
+import { SavingsModule } from './savings/savings.module';
 
 @Module({
   imports: [
@@ -110,6 +111,7 @@ import { BudgetsModule } from './budgets/budgets.module';
     AuthModule,
     PaymentNotificationsModule,
     BudgetsModule,
+    SavingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

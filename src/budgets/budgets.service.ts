@@ -146,7 +146,7 @@ export class BudgetsService {
       userId,
       items,
     } = createBudgetDto;
-
+    console.log({createBudgetDto});
     // Busca el presupuesto actual
     const currentBudget = await this.budgetRepository.findOne({
       where: {
