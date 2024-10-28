@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -6,6 +7,11 @@ import {
   IsPositive,
   isPositive,
 } from 'class-validator';
+
+export interface Item {
+  itemId: number;
+  spendType: number;
+}
 
 export class CreateBudgetDto {
   @IsNotEmpty()
@@ -34,5 +40,5 @@ export class CreateBudgetDto {
   userId: number;
   @IsOptional()
   @IsArray()
-  items?: { itemId: number; spendType: number }[];
+  items?: Item[];
 }

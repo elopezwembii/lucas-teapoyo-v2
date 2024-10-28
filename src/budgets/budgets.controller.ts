@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { BudgetsService } from './budgets.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
-import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { Protected } from 'src/auth/decorators/protected.decorator';
 
 @Controller('budgets')

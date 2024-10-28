@@ -32,4 +32,10 @@ export class Savings {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'id_usuario' })
   usuario: User;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }
