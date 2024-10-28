@@ -20,7 +20,6 @@ export class ProtectedIntegration implements CanActivate {
     if (!apiKey) throw new UnauthorizedException('Clave de API requerida.');
 
     const integration = await this.integrationService.findOne(apiKey);
-    console.log({ authHeader, apiKey, integration });
     if (!integration) throw new UnauthorizedException('Clave de API inválida.');
 
     return true;

@@ -79,7 +79,6 @@ export class ChatbotService {
       if (error && error.status && error.status === 429) {
         throw new BadRequestException('Límite excedido.');
       } else {
-        console.log(error);
         throw new InternalServerErrorException(error.error);
       }
     }

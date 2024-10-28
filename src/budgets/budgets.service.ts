@@ -123,15 +123,14 @@ export class BudgetsService {
         return this.budgetItemRepository.create({
           monto: item.monto,
           tipoGasto: item.tipoGasto,
-          presupuesto: { id: currentBudget.id }, // Relación con el presupuesto actual
+          presupuesto: { id: currentBudget.id },
         });
       });
 
-      await this.budgetItemRepository.save(itemsToSave); // Guardar todos los items a la vez
+      await this.budgetItemRepository.save(itemsToSave);
 
       currentBudget.fijado = 1;
-      await this.budgetRepository.save(currentBudget); // Guardar el presupuesto actualizado
-
+      await this.budgetRepository.save(currentBudget);
       return { message: 'Presupuesto clonado del mes anterior' };
     } else {
       throw new NotFoundException({ message: 'No hay items para replicar.' });
@@ -157,7 +156,6 @@ export class BudgetsService {
       },
     });
 
-    // Busca el presupuesto anterior
     const lastBudget = await this.budgetRepository.findOne({
       where: {
         mes: previousMonth,
@@ -174,19 +172,17 @@ export class BudgetsService {
       throw new NotFoundException('Presupuesto anterior no encontrado.');
     }
 
-    // Busca los items a replicar
     const itemsToReplicatePromises = items.map(
-      async ({ itemId, spendType }) => {
-        const item = await this.budgetItemRepository.findOne({
-          where: { id: itemId, idTipoGasto: spendType },
-        });
-        console.log(`Buscando item con ID ${itemId}:`, item);
-        return item;
-      },
+      async ({ itemId, spendType }) =>
+        await this.budgetItemRepository.findOne({
+          where: {
+            id: itemId,
+            tipoGasto: { id: spendType },
+          },
+        }),
     );
 
     const itemsToReplicate = await Promise.all(itemsToReplicatePromises);
-    console.log({ itemsToReplicate });
 
     if (
       itemsToReplicate.length === 0 ||
@@ -201,7 +197,7 @@ export class BudgetsService {
       if (itemToReplicate) {
         const newItem = this.budgetItemRepository.create({
           monto: itemToReplicate.monto,
-          tipoGasto: { id: itemToReplicate.id },
+          tipoGasto: { id: itemToReplicate.idTipoGasto },
           presupuesto: { id: currentBudget.id },
         });
         budgetItemsToSave.push(newItem);
@@ -216,7 +212,6 @@ export class BudgetsService {
     currentBudget.fijado = 1;
     const updatedBudget = await this.budgetRepository.save(currentBudget);
 
-    console.log({ updatedBudget });
 
     return { message: 'Items de presupuesto clonados del mes anterior' };
   }
