@@ -177,7 +177,7 @@ export class BudgetsService {
     // Busca los items a replicar
     const itemsToReplicatePromises = items.map(async (itemId) => {
       const item = await this.budgetItemRepository.findOne({
-        where: { id: itemId },
+        where: { id: itemId, idPresupuesto:lastBudget.id },
       });
       console.log(`Buscando item con ID ${itemId}:`, item);
       return item;
