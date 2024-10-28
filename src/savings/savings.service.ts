@@ -32,10 +32,11 @@ export class SavingsService {
           totalRecaudado: 0,
         };
       }
-
-      acc[monthYear].totalMeta += acum.meta;
-      acc[monthYear].totalRecaudado += acum.recaudado;
-
+      acc[monthYear] = {
+        ...acum,
+        totalMeta: acc[monthYear].totalMeta + acum.meta,
+        totalRecaudado: acc[monthYear].totalRecaudado + acum.recaudado,
+      };
       return acc;
     }, {});
 
