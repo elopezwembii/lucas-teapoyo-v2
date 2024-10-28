@@ -17,7 +17,7 @@ export class BudgetItem {
   monto: number;
 
   @ManyToOne(() => Budget)
-  @JoinColumn({ name: 'id_presupuesto' }) 
+  @JoinColumn({ name: 'id_presupuesto' })
   presupuesto: Budget;
 
   @ManyToOne(() => SpendType)
@@ -25,5 +25,8 @@ export class BudgetItem {
   tipoGasto: SpendType;
 
   @Column({ name: 'id_presupuesto', type: 'int' })
-  idPresupuesto: number; 
+  idPresupuesto: number;
+
+  @Column({ name: 'tipo_gasto', type: 'int' })
+  idTipoGasto: number; 
 }

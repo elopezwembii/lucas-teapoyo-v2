@@ -1,5 +1,5 @@
 import {
-    IsArray,
+  IsArray,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -34,5 +34,5 @@ export class CreateBudgetDto {
   userId: number;
   @IsOptional()
   @IsArray()
-  items?: number[];
+  items?: { itemId: number; spendType: number }[];
 }
