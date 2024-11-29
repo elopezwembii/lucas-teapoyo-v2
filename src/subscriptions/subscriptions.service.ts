@@ -83,6 +83,7 @@ export class SubscriptionsService {
       {
         suscripcion_fin: subscribeSuccessDto.endDate,
         suscripcion_inicio: subscribeSuccessDto.startDate,
+        subscripcion_nombre: subscribeSuccessDto.reason,
       },
     );
     if (userUpdated.affected == 1) {

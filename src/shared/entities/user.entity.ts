@@ -62,7 +62,8 @@ export class User {
 
   @Column({ type: 'date', nullable: true })
   suscripcion_inicio?: Date;
-
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  subscripcion_nombre: string;
   @Column({ type: 'date', nullable: true })
   suscripcion_fin?: Date;
 
@@ -77,7 +78,6 @@ export class User {
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   remember_token?: string;
-
 
   @Column({ type: 'bigint', nullable: true })
   id_empresa?: number;

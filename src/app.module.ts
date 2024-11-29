@@ -58,13 +58,14 @@ import { SavingsModule } from './savings/savings.module';
       dbName: process.env.DATABASE_NAME,
     }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
+      type: 'mysql', // Puedes usar 'postgres', 'sqlite', etc.
+      host: process.env.DB_HOST, // Recuperar desde las variables de entorno
+      port: Number(process.env.DB_PORT), // Convertir a número
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      synchronize: process.env.DEV_MODE ? true : false,
+      synchronize: process.env.DEV_MODE === 'true', // Sincronizar solo en modo desarrollo
+      logging: process.env.DEV_MODE === 'true', // Habilitar logging solo en desarrollo
       entities: [
         Savings,
         Answer,
@@ -102,6 +103,8 @@ import { SavingsModule } from './savings/savings.module';
         UserTest,
         Users,
       ],
+      migrations: ['dist/migrations/*.js'], // Ubicación de las migraciones compiladas
+      migrationsRun: true, // Ejecutar las migraciones automáticamente al iniciar
     }),
     ChatbotModule,
     MailerModule,
