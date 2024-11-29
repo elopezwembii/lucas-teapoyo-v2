@@ -13,7 +13,6 @@ export class CreateChatbotDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(2000)
-  @MinLength(10)
   question: string;
   @IsNumber()
   @IsPositive()
