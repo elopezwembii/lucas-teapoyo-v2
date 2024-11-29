@@ -1,4 +1,5 @@
 export const  savingType: { [key: number]: { descripcion: string } } = {
+    0: { descripcion: 'No definido' },
     1: { descripcion: 'Ahorro celebraciones' },
     2: { descripcion: 'Ahorro cumpleaños' },
     3: { descripcion: 'Ahorro Educación' },

@@ -193,7 +193,7 @@ export class ChatbotService {
 
     // Configuración del agente para HTTP/HTTPS
     const agent = new https.Agent({
-      rejectUnauthorized: false, // Esto es solo necesario si no tienes un certificado válido
+      rejectUnauthorized: false,
     });
 
     // Construcción de la URL, ajustando el protocolo si es necesario
@@ -223,7 +223,7 @@ export class ChatbotService {
       httpAgent: agent,
     });
 
-    // Procesar los datos obtenidos
+    console.log({ savings, debt, fixSpends, variableSpends });
     return {
       budget: {
         incoming: budget.ingreso,
@@ -266,7 +266,7 @@ export class ChatbotService {
           goalAmount: meta,
           raised: recaudado,
           dateLimit: fecha_limite,
-          savingType: savingType[tipo_ahorro].descripcion,
+          savingType: savingType[tipo_ahorro].descripcion ?? savingType[0],
         }),
       ),
       fixSpends: fixSpends.map(
