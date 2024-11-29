@@ -92,11 +92,15 @@ export class ChatbotService {
     const normalizedText = this.removeSpecialCharacters(userText);
 
     if (normalizedText.includes('presupuesto')) {
-      console.log({
-        include: normalizedText.includes('presupuesto'),
-        normalizedText,
-      });
-      return await this.showSugerences(token, extraData);
+      try {
+        console.log({
+          include: normalizedText.includes('presupuesto'),
+          normalizedText,
+        });
+        return await this.showSugerences(token, extraData);
+      } catch (error) {
+        console.log({ error });
+      }
     }
     if (await this.isGreeting(normalizedText)) {
       return await this.openAiService.ask(
