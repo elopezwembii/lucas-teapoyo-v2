@@ -38,7 +38,6 @@ export class SubscriptionsController {
     return this.subscriptionsService.findOne(+id);
   }
   @Get('success')
-  @Protected()
   async subscribe(
     @Query() subscribeSuccessDto: SubscribeSuccessDto,
     @Res() res: Response,
