@@ -1,5 +1,8 @@
 # Build Stage
 FROM node:20.10.0 as builder
+##ONLY USED FOR PHP API
+ENV NODE_TLS_REJECT_UNAUTHORIZED='0'
+
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
