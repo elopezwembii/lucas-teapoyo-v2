@@ -76,7 +76,7 @@ export class ChatbotService {
       if (error && error.status && error.status === 429) {
         throw new BadRequestException('Límite excedido.');
       } else {
-        throw new InternalServerErrorException(error.error);
+        return error;
       }
     }
   }
@@ -97,7 +97,7 @@ export class ChatbotService {
         return await this.showSugerences(token, extraData);
       } catch (error) {
         console.log({ error });
-        throw new InternalServerErrorException(error);
+        return error;
       }
     }
     if (await this.isGreeting(normalizedText)) {
@@ -142,15 +142,14 @@ export class ChatbotService {
     extraData: { month: number; year: number; userId: number },
   ) {
     console.log('buscando...');
-    try {
-      const { budget, fixSpends, variableSpends, debt, savings } =
-        await this.retrieveBudgetData(token, extraData);
-      if (!budget && !variableSpends.length && !fixSpends.length) {
-        return `Aún no tienes gastos que pueda utilizar para analizarlos. ¡Añade gastos para darte sugerencias!`;
-      }
-      const insightsContext = `[Instruccion : Eres un bot llamado luca$, no te presentes, debes dar la informacion con mucha educacion y con humor utilizando emojis: ]`;
-      const response = await this.openAiService.ask(
-        `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada  
+    const { budget, fixSpends, variableSpends, debt, savings } =
+      await this.retrieveBudgetData(token, extraData);
+    if (!budget && !variableSpends.length && !fixSpends.length) {
+      return `Aún no tienes gastos que pueda utilizar para analizarlos. ¡Añade gastos para darte sugerencias!`;
+    }
+    const insightsContext = `[Instruccion : Eres un bot llamado luca$, no te presentes, debes dar la informacion con mucha educacion y con humor utilizando emojis: ]`;
+    const response = await this.openAiService.ask(
+      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada  
       
       Ingresos totales: $${budget.incoming} 
       Datos de Gastos totales por categoría: ${budget.items.map((item) => `${item.category}:${item.amount}`).join(',')} 
@@ -169,138 +168,128 @@ export class ChatbotService {
 
        
        `,
-      );
-      console.log(response);
-      return response;
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(error);
-    }
+    );
+    console.log(response);
+    return response;
   }
 
   async retrieveBudgetData(
     token: string,
     extraData: { month: number; year: number; userId: number },
   ) {
-    try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
 
-      // Obtén la URL base desde la configuración
-      const apiUrl = this.configService.get('MAIN_API_URL');
+    // Obtén la URL base desde la configuración
+    const apiUrl = this.configService.get('MAIN_API_URL');
 
-      // Verifica si estamos en localhost
-      const isLocalhost =
-        apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1');
+    // Verifica si estamos en localhost
+    const isLocalhost =
+      apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1');
 
-      // Si estamos en localhost, aseguramos que el protocolo sea 'http'
-      const protocol = isLocalhost ? 'http' : 'https';
+    // Si estamos en localhost, aseguramos que el protocolo sea 'http'
+    const protocol = isLocalhost ? 'http' : 'https';
 
-      // Configuración del agente para HTTP/HTTPS
-      const agent = new https.Agent({
-        rejectUnauthorized: false, // Esto es solo necesario si no tienes un certificado válido
-      });
+    // Configuración del agente para HTTP/HTTPS
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Esto es solo necesario si no tienes un certificado válido
+    });
 
-      // Construcción de la URL, ajustando el protocolo si es necesario
-      const budgetUrl = `${protocol}://${apiUrl}/presupuesto_por_mes?mes=${extraData.month}&anio=${extraData.year}&id_usuario=${extraData.userId}`;
-      const variableSpendsUrl = `${protocol}://${apiUrl}/gastos_variables`;
-      const fixSpendsUrl = `${protocol}://${apiUrl}/gastos_fijos`;
-      const savingsUrl = `${protocol}://${apiUrl}/obtener_ahorro`;
-      const debtUrl = `${protocol}://${apiUrl}/obtener_deuda`;
-      console.log({ variableSpendsUrl, fixSpendsUrl, savingsUrl });
-      // Realizar las solicitudes usando Axios
-      const { data: budget } = await axios.get<GetBudgetResponse>(budgetUrl, {
-        headers,
-      });
-      const { data: variableSpends } = await axios.get<
-        GetVariableSpendResponse[]
-      >(variableSpendsUrl, { headers, httpAgent: agent });
-      const { data: fixSpends } = await axios.get<GetVariableSpendResponse[]>(
-        fixSpendsUrl,
-        { headers, httpAgent: agent },
-      );
-      const { data: savings } = await axios.get<GetSavingsResponse[]>(
-        savingsUrl,
-        { headers, httpAgent: agent },
-      );
-      const { data: debt } = await axios.get<GetDebtResponse[]>(debtUrl, {
-        headers,
-        httpAgent: agent,
-      });
+    // Construcción de la URL, ajustando el protocolo si es necesario
+    const budgetUrl = `${protocol}://${apiUrl}/presupuesto_por_mes?mes=${extraData.month}&anio=${extraData.year}&id_usuario=${extraData.userId}`;
+    const variableSpendsUrl = `${protocol}://${apiUrl}/gastos_variables`;
+    const fixSpendsUrl = `${protocol}://${apiUrl}/gastos_fijos`;
+    const savingsUrl = `${protocol}://${apiUrl}/obtener_ahorro`;
+    const debtUrl = `${protocol}://${apiUrl}/obtener_deuda`;
+    console.log({ variableSpendsUrl, fixSpendsUrl, savingsUrl });
+    // Realizar las solicitudes usando Axios
+    const { data: budget } = await axios.get<GetBudgetResponse>(budgetUrl, {
+      headers,
+    });
+    const { data: variableSpends } = await axios.get<
+      GetVariableSpendResponse[]
+    >(variableSpendsUrl, { headers, httpAgent: agent });
+    const { data: fixSpends } = await axios.get<GetVariableSpendResponse[]>(
+      fixSpendsUrl,
+      { headers, httpAgent: agent },
+    );
+    const { data: savings } = await axios.get<GetSavingsResponse[]>(
+      savingsUrl,
+      { headers, httpAgent: agent },
+    );
+    const { data: debt } = await axios.get<GetDebtResponse[]>(debtUrl, {
+      headers,
+      httpAgent: agent,
+    });
 
-      // Procesar los datos obtenidos
-      return {
-        budget: {
-          incoming: budget.ingreso,
-          items: budget.presupuesto
-            .find(
-              (budget) =>
-                budget.anio === extraData.year &&
-                budget.mes === extraData.month,
-            )
-            .get_items.map((item) => ({
-              category: spendCategory[item.tipo_gasto].description,
-              amount: item.monto,
-            })),
-        },
-        debt: debt.map(
-          ({
-            desc,
-            costo_total,
-            deuda_pendiente,
-            cuotas_pagadas,
-            cuotas_totales,
-            id_banco,
-            pago_mensual,
-            dia_pago,
-          }) => ({
-            description: desc,
-            feesPaids: cuotas_pagadas,
-            totalFees: cuotas_totales,
-            fee: pago_mensual,
-            paidDay: dia_pago,
-            totalCost: costo_total,
-            pendingDebt: deuda_pendiente,
-            paidAmount:
-              cuotas_totales * pago_mensual - cuotas_pagadas * pago_mensual,
-            finantialEntity: finantialEntities[id_banco].description,
-          }),
-        ),
-        savings: savings.map(
-          ({ desc, recaudado, meta, fecha_limite, tipo_ahorro }) => ({
-            goalDescription: desc,
-            goalAmount: meta,
-            raised: recaudado,
-            dateLimit: fecha_limite,
-            savingType: savingType[tipo_ahorro].descripcion,
-          }),
-        ),
-        fixSpends: fixSpends.map(
-          ({ desc, get_sub_tipo, monto, dia, mes, anio }) => ({
-            desc,
-            category: get_sub_tipo.nombre,
-            amount: monto,
-            day: dia,
-            month: mes,
-            year: anio,
-          }),
-        ),
-        variableSpends: variableSpends.map(
-          ({ desc, get_sub_tipo, monto, dia, mes, anio }) => ({
-            desc,
-            category: get_sub_tipo.nombre,
-            amount: monto,
-            day: dia,
-            month: mes,
-            year: anio,
-          }),
-        ),
-      };
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(error);
-    }
+    // Procesar los datos obtenidos
+    return {
+      budget: {
+        incoming: budget.ingreso,
+        items: budget.presupuesto
+          .find(
+            (budget) =>
+              budget.anio === extraData.year && budget.mes === extraData.month,
+          )
+          .get_items.map((item) => ({
+            category: spendCategory[item.tipo_gasto].description,
+            amount: item.monto,
+          })),
+      },
+      debt: debt.map(
+        ({
+          desc,
+          costo_total,
+          deuda_pendiente,
+          cuotas_pagadas,
+          cuotas_totales,
+          id_banco,
+          pago_mensual,
+          dia_pago,
+        }) => ({
+          description: desc,
+          feesPaids: cuotas_pagadas,
+          totalFees: cuotas_totales,
+          fee: pago_mensual,
+          paidDay: dia_pago,
+          totalCost: costo_total,
+          pendingDebt: deuda_pendiente,
+          paidAmount:
+            cuotas_totales * pago_mensual - cuotas_pagadas * pago_mensual,
+          finantialEntity: finantialEntities[id_banco].description,
+        }),
+      ),
+      savings: savings.map(
+        ({ desc, recaudado, meta, fecha_limite, tipo_ahorro }) => ({
+          goalDescription: desc,
+          goalAmount: meta,
+          raised: recaudado,
+          dateLimit: fecha_limite,
+          savingType: savingType[tipo_ahorro].descripcion,
+        }),
+      ),
+      fixSpends: fixSpends.map(
+        ({ desc, get_sub_tipo, monto, dia, mes, anio }) => ({
+          desc,
+          category: get_sub_tipo.nombre,
+          amount: monto,
+          day: dia,
+          month: mes,
+          year: anio,
+        }),
+      ),
+      variableSpends: variableSpends.map(
+        ({ desc, get_sub_tipo, monto, dia, mes, anio }) => ({
+          desc,
+          category: get_sub_tipo.nombre,
+          amount: monto,
+          day: dia,
+          month: mes,
+          year: anio,
+        }),
+      ),
+    };
   }
 
   private async isThankYou(text: string) {
