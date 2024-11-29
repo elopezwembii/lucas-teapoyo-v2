@@ -97,7 +97,7 @@ export class ChatbotService {
         return await this.showSugerences(token, extraData);
       } catch (error) {
         console.log({ error });
-        return error;
+        throw new InternalServerErrorException(error);
       }
     }
     if (await this.isGreeting(normalizedText)) {
@@ -174,7 +174,7 @@ export class ChatbotService {
       return response;
     } catch (error) {
       console.log(error);
-      return error;
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -299,7 +299,7 @@ export class ChatbotService {
       };
     } catch (error) {
       console.log(error);
-      return error;
+      throw new InternalServerErrorException(error);
     }
   }
 
