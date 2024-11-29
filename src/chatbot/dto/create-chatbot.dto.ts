@@ -26,4 +26,6 @@ export class CreateChatbotDto {
   @IsPositive()
   @IsNotEmpty()
   month: number;
+  @IsString()
+  token: string;
 }

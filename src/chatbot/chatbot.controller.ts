@@ -29,10 +29,7 @@ export class ChatbotController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = await this.chatbotService.ask(
-      createChatbotDto,
-      req.headers['authorization'],
-    );
+    const response = await this.chatbotService.ask(createChatbotDto);
     return res.status(200).json(response);
   }
   @Get('test')

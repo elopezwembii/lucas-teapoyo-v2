@@ -42,10 +42,7 @@ export class ChatbotService {
   async test() {
     return await this.repository.find();
   }
-  async ask(
-    { question, userId, year, month }: CreateChatbotDto,
-    token: string,
-  ) {
+  async ask({ question, userId, year, month, token }: CreateChatbotDto) {
     if (!question) throw new BadRequestException('El mensaje es requerido.');
 
     if (!token) throw new UnauthorizedException('El token es requerido.');
@@ -176,6 +173,7 @@ export class ChatbotService {
       return response;
     } catch (error) {
       console.log(error);
+      return error;
     }
   }
 
@@ -185,7 +183,7 @@ export class ChatbotService {
   ) {
     try {
       const headers = {
-        Authorization: `Bearer ${token.split('Bearer ')[1].trim()}`,
+        Authorization: `Bearer ${token}`,
       };
 
       // Obtén la URL base desde la configuración
@@ -213,7 +211,6 @@ export class ChatbotService {
       // Realizar las solicitudes usando Axios
       const { data: budget } = await axios.get<GetBudgetResponse>(budgetUrl, {
         headers,
-        httpAgent: agent,
       });
       const { data: variableSpends } = await axios.get<
         GetVariableSpendResponse[]
@@ -301,7 +298,7 @@ export class ChatbotService {
       };
     } catch (error) {
       console.log(error);
-      return null; // Puedes manejar el error de otra manera si es necesario
+      return error; 
     }
   }
 
