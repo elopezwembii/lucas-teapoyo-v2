@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Plan } from 'src/shared/entities/plan.entity';
 import { User } from 'src/shared/entities/user.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MyPlan, MyPlanSchema } from './entities/plan.entity';
 
 @Module({
   controllers: [SubscriptionsController],
@@ -14,7 +16,16 @@ import { AuthModule } from 'src/auth/auth.module';
     TypeOrmModule.forFeature([Plan]),
     TypeOrmModule.forFeature([User]),
     ConfigModule,
-    AuthModule
+    AuthModule,
+    MongooseModule.forFeature(
+      [
+        {
+          name: MyPlan.name,
+          schema: MyPlanSchema,
+        },
+      ],
+      'general',
+    ),
   ],
 })
 export class SubscriptionsModule {}

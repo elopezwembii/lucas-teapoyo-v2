@@ -14,6 +14,10 @@ import { Plan } from 'src/shared/entities/plan.entity';
 import { Currency } from './types/currency.type';
 import { User } from 'src/shared/entities/user.entity';
 import { SubscribeSuccessDto } from './dto/subscribe-success-query.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Subscription } from 'src/shared/entities/subscription.entity';
+import { Model } from 'mongoose';
+import { MyPlan } from './entities/plan.entity';
 
 @Injectable()
 export class SubscriptionsService {
@@ -26,6 +30,8 @@ export class SubscriptionsService {
     private repository: Repository<Plan>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectModel(Subscription.name, 'general')
+    private readonly myPlanModel: Model<MyPlan>,
   ) {
     this.client = new MercadoPagoConfig({
       accessToken: this.configService.get('MERCADO_PAGO_ACCESS_TOKEN'),
@@ -87,6 +93,28 @@ export class SubscriptionsService {
       },
     );
     if (userUpdated.affected == 1) {
+      return {
+        redirectUrl: this.configService.get('SUBSCRIPTION_SUCCESS_URL'),
+      };
+    }
+    const planExists = await this.myPlanModel.findOne({
+      userId: subscribeSuccessDto.id,
+    });
+    if (planExists) {
+      await this.myPlanModel.updateOne({
+        startDate: subscribeSuccessDto.startDate,
+        endDate: subscribeSuccessDto.endDate,
+        reason: subscribeSuccessDto.reason,
+      });
+      return {
+        redirectUrl: this.configService.get('SUBSCRIPTION_SUCCESS_URL'),
+      };
+    } else {
+      await this.myPlanModel.create({
+        startDate: subscribeSuccessDto.startDate,
+        endDate: subscribeSuccessDto.endDate,
+        reason: subscribeSuccessDto.reason,
+      });
       return {
         redirectUrl: this.configService.get('SUBSCRIPTION_SUCCESS_URL'),
       };
