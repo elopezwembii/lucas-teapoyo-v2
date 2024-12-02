@@ -15,6 +15,7 @@ import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { SubscribeSuccessDto } from './dto/subscribe-success-query.dto';
 import { Response } from 'express';
 import { Protected } from 'src/auth/decorators/protected.decorator';
+import { CreatePlanDto } from './dto/create-plan.dto';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
@@ -50,6 +51,11 @@ export class SubscriptionsController {
   @Protected()
   async readMyPlan(@Query('userId') userId: string) {
     return await this.subscriptionsService.findMyPlan(userId);
+  }
+  @Post('create-apoyo')
+  @Protected()
+  async createPlan(@Body() createPlanDto: CreatePlanDto) {
+    return await this.subscriptionsService.createPlan(createPlanDto);
   }
 
   @Patch('subscription')

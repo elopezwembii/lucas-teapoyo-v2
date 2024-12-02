@@ -17,6 +17,7 @@ import { SubscribeSuccessDto } from './dto/subscribe-success-query.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MyPlan } from './entities/plan.entity';
+import { CreatePlanDto } from './dto/create-plan.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -125,6 +126,16 @@ export class SubscriptionsService {
   async findMyPlan(userId: string) {
     return await this.myPlanModel.findOne({
       userId,
+    });
+  }
+  async createPlan(createPlanDto: CreatePlanDto) {
+    const date = new Date();
+    const monthly = date.setDate(date.getDate() + 30);
+    return await this.myPlanModel.create({
+      userId: createPlanDto.userId,
+      startDate: date.toISOString(),
+      endDate: monthly,
+      reason: createPlanDto.reason,
     });
   }
 
