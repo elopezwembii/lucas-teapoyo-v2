@@ -52,7 +52,7 @@ export class SubscriptionsController {
   async readMyPlan(@Query('userId') userId: string) {
     return await this.subscriptionsService.findMyPlan(userId);
   }
-  @Post('create-apoyo')
+  @Post('create-plan')
   @Protected()
   async createPlan(@Body() createPlanDto: CreatePlanDto) {
     return await this.subscriptionsService.createPlan(createPlanDto);
