@@ -15,7 +15,6 @@ import { Currency } from './types/currency.type';
 import { User } from 'src/shared/entities/user.entity';
 import { SubscribeSuccessDto } from './dto/subscribe-success-query.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Subscription } from 'src/shared/entities/subscription.entity';
 import { Model } from 'mongoose';
 import { MyPlan } from './entities/plan.entity';
 
@@ -30,7 +29,7 @@ export class SubscriptionsService {
     private repository: Repository<Plan>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectModel(Subscription.name, 'general')
+    @InjectModel(MyPlan.name, 'general')
     private readonly myPlanModel: Model<MyPlan>,
   ) {
     this.client = new MercadoPagoConfig({
