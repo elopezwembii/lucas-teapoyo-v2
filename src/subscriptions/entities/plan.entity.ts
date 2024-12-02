@@ -11,8 +11,8 @@ export class MyPlan extends Document {
   @Prop({ required: true })
   userId: number;
 
-  @Prop({ required: true, enum: ['active', 'inactive'] })
-  preferenceId: 'active' | 'inactive';
+  @Prop({ required: false, enum: ['active', 'inactive'] })
+  preferenceId?: 'active' | 'inactive';
 }
 
 export const MyPlanSchema = SchemaFactory.createForClass(MyPlan);
