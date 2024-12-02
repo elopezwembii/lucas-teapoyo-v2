@@ -123,6 +123,11 @@ export class SubscriptionsService {
   async findAll() {
     return await this.repository.find();
   }
+  async findMyPlan(userId: string) {
+    return await this.myPlanModel.findOne({
+      userId,
+    });
+  }
 
   async findOne(id: number) {
     if (!id) throw new BadRequestException('Id es requerido.');

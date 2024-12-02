@@ -46,6 +46,11 @@ export class SubscriptionsController {
       await this.subscriptionsService.subscribeSuccess(subscribeSuccessDto);
     return res.redirect(result.redirectUrl);
   }
+  @Get('my-plan')
+  @Protected()
+  async readMyPlan(@Query('userId') userId: string) {
+    return await this.subscriptionsService.findMyPlan(userId);
+  }
 
   @Patch('subscription')
   @Protected()
