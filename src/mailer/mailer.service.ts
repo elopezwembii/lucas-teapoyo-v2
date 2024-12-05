@@ -16,9 +16,7 @@ export class MailerService {
 
     try {
       return await sgMail.send({
-        templateId: this.retrieveTemplateId(
-          this.parseEmailType(emailData.type),
-        ),
+        templateId: this.parseEmailType(emailData.type),
         to: emailData.to,
         from: emailData.from,
         subject: emailData.subject,
@@ -34,12 +32,14 @@ export class MailerService {
     }
   }
   private parseEmailType(emailType: string) {
-    if (emailType === 'marketingEmail') return EmailType.MARKETING_EMAIL;
-    if (emailType === 'budgetEmail') return EmailType.BUDGET_EMAIL;
+    if (emailType === 'marketingEmail')
+      return 'd-c0f62d6234d94977aee21e20481bcc3d';
+    if (emailType === 'budgetEmail')
+      return 'd-f473bcf2380d4f2ebdc789d4632ac211';
     if (emailType === 'reminderBudgetEmail')
       return EmailType.REMINDER_BUDGET_EMAIL;
     if (emailType === 'paymentNotificationEmail')
-      return EmailType.PAYMENT_NOTIFICATION_EMAIL;
+      return 'd-c4dbee00cbf74ec8a82f36b1fb064930';
   }
   private retrieveTemplateId(type: EmailType) {
     switch (type) {
