@@ -84,19 +84,12 @@ export class SubscriptionsService {
     }
   }
   async subscribeSuccess(subscribeSuccessDto: SubscribeSuccessDto) {
-    const userUpdated = await this.userRepository.update(
-      subscribeSuccessDto.id,
-      {
-        suscripcion_fin: subscribeSuccessDto.endDate,
-        suscripcion_inicio: subscribeSuccessDto.startDate,
-        subscripcion_nombre: subscribeSuccessDto.reason,
-      },
-    );
-    if (userUpdated.affected == 1) {
-      return {
-        redirectUrl: this.configService.get('SUBSCRIPTION_SUCCESS_URL'),
-      };
-    }
+    await this.userRepository.update(subscribeSuccessDto.id, {
+      suscripcion_fin: subscribeSuccessDto.endDate,
+      suscripcion_inicio: subscribeSuccessDto.startDate,
+      subscripcion_nombre: 'premium',
+    });
+
     const planExists = await this.myPlanModel.findOne({
       userId: subscribeSuccessDto.id,
     });
@@ -104,7 +97,7 @@ export class SubscriptionsService {
       await this.myPlanModel.updateOne({
         startDate: subscribeSuccessDto.startDate,
         endDate: subscribeSuccessDto.endDate,
-        reason: subscribeSuccessDto.reason,
+        reason: 'premium',
       });
       return {
         redirectUrl: this.configService.get('SUBSCRIPTION_SUCCESS_URL'),
@@ -113,7 +106,7 @@ export class SubscriptionsService {
       await this.myPlanModel.create({
         startDate: subscribeSuccessDto.startDate,
         endDate: subscribeSuccessDto.endDate,
-        reason: subscribeSuccessDto.reason,
+        reason: 'premium',
       });
       return {
         redirectUrl: this.configService.get('SUBSCRIPTION_SUCCESS_URL'),

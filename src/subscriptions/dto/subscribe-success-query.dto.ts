@@ -13,8 +13,4 @@ export class SubscribeSuccessDto {
   @IsNotEmpty()
   @IsISO8601()
   endDate: string;
-  
-  @IsString()
-  @IsNotEmpty()
-  reason: string;
 }

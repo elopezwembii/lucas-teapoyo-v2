@@ -16,7 +16,9 @@ export class MailerService {
 
     try {
       return await sgMail.send({
-        templateId: this.retrieveTemplateId(emailData.type),
+        templateId: this.retrieveTemplateId(
+          this.parseEmailType(emailData.type),
+        ),
         to: emailData.to,
         from: emailData.from,
         subject: emailData.subject,
@@ -30,6 +32,14 @@ export class MailerService {
         'Ha ocurrido un error mientras se envíaba el email',
       );
     }
+  }
+  private parseEmailType(emailType: string) {
+    if (emailType === 'marketingEmail') return EmailType.MARKETING_EMAIL;
+    if (emailType === 'budgetEmail') return EmailType.BUDGET_EMAIL;
+    if (emailType === 'reminderBudgetEmail')
+      return EmailType.REMINDER_BUDGET_EMAIL;
+    if (emailType === 'paymentNotificationEmail')
+      return EmailType.PAYMENT_NOTIFICATION_EMAIL;
   }
   private retrieveTemplateId(type: EmailType) {
     switch (type) {
