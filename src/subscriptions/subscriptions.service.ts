@@ -87,7 +87,6 @@ export class SubscriptionsService {
     await this.userRepository.update(subscribeSuccessDto.id, {
       suscripcion_fin: subscribeSuccessDto.endDate,
       suscripcion_inicio: subscribeSuccessDto.startDate,
-      subscripcion_nombre: 'premium',
     });
 
     const planExists = await this.myPlanModel.findOne({

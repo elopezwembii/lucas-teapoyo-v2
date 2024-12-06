@@ -17,7 +17,7 @@ export class Income {
   @Column({ type: 'varchar', nullable: true })
   desc?: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', name: 'monto_real' })
   montoReal: number;
 
   @Column({ type: 'int', nullable: true })
@@ -32,16 +32,16 @@ export class Income {
   @Column({ type: 'boolean' })
   fijar: boolean;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'mes_termino' })
   mesTermino?: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'anio_termino' })
   anioTermino?: number;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'id_usuario' })
   usuario?: User;
 
-  @Column({ type: 'bigint', nullable: true })
+  @Column({ type: 'bigint', nullable: true, name: 'tipo_ingreso' })
   tipoIngreso?: number;
 }

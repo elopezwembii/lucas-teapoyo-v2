@@ -41,7 +41,6 @@ import { TipoDeuda } from './shared/entities/tipo-deuda.entity';
 import { User } from './shared/entities/user.entity';
 import { UserRole } from './shared/entities/user-role.entity';
 import { UserTest } from './shared/entities/user-test.entity';
-import { Users } from './shared/entities/users.entity';
 import { Notification } from './shared/entities/notification.entity';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -101,7 +100,6 @@ import { SavingsModule } from './savings/savings.module';
         User,
         UserRole,
         UserTest,
-        Users,
       ],
       migrations: ['dist/migrations/*.js'], // Ubicación de las migraciones compiladas
       migrationsRun: true, // Ejecutar las migraciones automáticamente al iniciar

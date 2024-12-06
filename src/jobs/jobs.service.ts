@@ -31,10 +31,12 @@ export class JobsService {
     return await this.mailerService.sendEmail(emailData);
   }
 
-  // @Cron('0 0 1 * *')
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron('0 0 1 * *')
   async handleStartOfMonth() {
     const now = new Date();
+    let budgetItems = null;
+    let budgetTotalSpends = 0;
+    let budgetTotalAmount = 0;
     const users = await this.userRepository.find();
     const monthlyBudget = await this.budgetRepository.findOne({
       where: {
@@ -42,26 +44,26 @@ export class JobsService {
         mes: now.getMonth(),
       },
     });
+    if (monthlyBudget !== null) {
+      budgetItems = await this.budgetItemRepository.find({
+        where: {
+          idPresupuesto: monthlyBudget.id,
+        },
+      });
+      budgetTotalSpends = budgetItems.reduce(
+        (acc, acum) => acc + acum.monto,
+        0,
+      );
+    }
+
     const incomes = await this.incomeRepository.find({
       where: {
         anio: now.getFullYear(),
         mes: now.getMonth(),
       },
     });
-    const budgetTotalAmount = incomes.reduce(
-      (acc, acum) => acc + acum.montoReal,
-      0,
-    );
-    const budgetItems = await this.budgetItemRepository.find({
-      where: {
-        idPresupuesto: monthlyBudget.id,
-      },
-    });
+    budgetTotalAmount = incomes.reduce((acc, acum) => acc + acum.montoReal, 0);
 
-    const budgetTotalSpends = budgetItems.reduce(
-      (acc, acum) => acc + acum.monto,
-      0,
-    );
     const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
     return users.map(async (user) => {
       return await this.sendNotification({
@@ -81,11 +83,13 @@ export class JobsService {
     });
   }
 
-  // @Cron('0 0 15 * *')
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron('0 0 15 * *')
   async handleMidMonth() {
     const now = new Date();
     const users = await this.userRepository.find();
+    let budgetRemaining = 0;
+    let budgetTotalAmount = 0;
+    let budgetTotalSpends = null;
     const monthlyBudget = await this.budgetRepository.findOne({
       where: {
         anio: now.getFullYear(),
@@ -98,22 +102,23 @@ export class JobsService {
         mes: now.getMonth(),
       },
     });
-    const budgetTotalAmount = incomes.reduce(
-      (acc, acum) => acc + acum.montoReal,
-      0,
-    );
-    const budgetItems = await this.budgetItemRepository.find({
-      where: {
-        idPresupuesto: monthlyBudget.id,
-      },
-    });
+    if (monthlyBudget !== null) {
+      const budgetTotalAmount = incomes.reduce(
+        (acc, acum) => acc + acum.montoReal,
+        0,
+      );
+      const budgetItems = await this.budgetItemRepository.find({
+        where: {
+          idPresupuesto: monthlyBudget.id,
+        },
+      });
 
-    const budgetTotalSpends = budgetItems.reduce(
-      (acc, acum) => acc + acum.monto,
-      0,
-    );
-    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
-
+      const budgetTotalSpends = budgetItems.reduce(
+        (acc, acum) => acc + acum.monto,
+        0,
+      );
+      budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+    }
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
@@ -133,10 +138,12 @@ export class JobsService {
     });
   }
 
-  // @Cron('0 0 28-31 * *')
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron('0 0 28-31 * *')
   async handleEndOfMonth() {
     const now = new Date();
+    let budgetRemaining = 0;
+    let budgetTotalAmount = 0;
+    let budgetTotalSpends = null;
     const users = await this.userRepository.find();
     const monthlyBudget = await this.budgetRepository.findOne({
       where: {
@@ -150,22 +157,23 @@ export class JobsService {
         mes: now.getMonth(),
       },
     });
-    const budgetTotalAmount = incomes.reduce(
-      (acc, acum) => acc + acum.montoReal,
-      0,
-    );
-    const budgetItems = await this.budgetItemRepository.find({
-      where: {
-        idPresupuesto: monthlyBudget.id,
-      },
-    });
+    if (monthlyBudget !== null) {
+      budgetTotalAmount = incomes.reduce(
+        (acc, acum) => acc + acum.montoReal,
+        0,
+      );
+      const budgetItems = await this.budgetItemRepository.find({
+        where: {
+          idPresupuesto: monthlyBudget.id,
+        },
+      });
 
-    const budgetTotalSpends = budgetItems.reduce(
-      (acc, acum) => acc + acum.monto,
-      0,
-    );
-    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
-
+      budgetTotalSpends = budgetItems.reduce(
+        (acc, acum) => acc + acum.monto,
+        0,
+      );
+      budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+    }
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
@@ -185,11 +193,14 @@ export class JobsService {
     });
   }
 
-  // @Interval(172800000)
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Interval(172800000)
+  // @Cron(CronExpression.EVERY_MINUTE)
   async handleEvery48Hours() {
     const now = new Date();
     const users = await this.userRepository.find();
+    let budgetRemaining = 0;
+    let budgetTotalAmount = 0;
+    let budgetTotalSpends = null;
     const monthlyBudget = await this.budgetRepository.findOne({
       where: {
         anio: now.getFullYear(),
@@ -202,22 +213,23 @@ export class JobsService {
         mes: now.getMonth(),
       },
     });
-    const budgetTotalAmount = incomes.reduce(
-      (acc, acum) => acc + acum.montoReal,
-      0,
-    );
-    const budgetItems = await this.budgetItemRepository.find({
-      where: {
-        idPresupuesto: monthlyBudget.id,
-      },
-    });
+    if (monthlyBudget !== null) {
+      budgetTotalAmount = incomes.reduce(
+        (acc, acum) => acc + acum.montoReal,
+        0,
+      );
+      const budgetItems = await this.budgetItemRepository.find({
+        where: {
+          idPresupuesto: monthlyBudget.id,
+        },
+      });
 
-    const budgetTotalSpends = budgetItems.reduce(
-      (acc, acum) => acc + acum.monto,
-      0,
-    );
-    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
-
+      budgetTotalSpends = budgetItems.reduce(
+        (acc, acum) => acc + acum.monto,
+        0,
+      );
+      budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+    }
     return users.map(async (user) => {
       return await this.sendNotification({
         from: this.configService.get('ROOT_EMAIL_DOMAIN'),
@@ -235,7 +247,7 @@ export class JobsService {
       });
     });
   }
-  // @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  // // @Cron(CronExpression.EVERY_DAY_AT_10AM)
   @Cron(CronExpression.EVERY_MINUTE)
   async sendPaymentNotifications() {
     const date = new Date();
@@ -264,7 +276,7 @@ export class JobsService {
       });
     }
   }
-  // @Cron(CronExpression.EVERY_DAY_AT_3PM)
+  // // @Cron(CronExpression.EVERY_DAY_AT_3PM)
   @Cron(CronExpression.EVERY_MINUTE)
   async checkBudgets() {
     const now = new Date();

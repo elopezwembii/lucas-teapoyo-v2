@@ -13,12 +13,12 @@ export class MailerService {
   constructor(private readonly configService: ConfigService) {}
   async sendEmail(emailData: SendEmailDto) {
     sgMail.setApiKey(this.configService.get('SENDGRID_API_KEY'));
-
+    const templateId = this.parseEmailType(emailData.type);
     try {
       return await sgMail.send({
-        templateId: this.parseEmailType(emailData.type),
+        templateId,
         to: emailData.to,
-        from: emailData.from,
+        from: this.configService.get('ROOT_EMAIL_DOMAIN'),
         subject: emailData.subject,
         dynamicTemplateData: emailData.dynamicTemplateData,
       });
@@ -37,7 +37,8 @@ export class MailerService {
     if (emailType === 'budgetEmail')
       return 'd-f473bcf2380d4f2ebdc789d4632ac211';
     if (emailType === 'reminderBudgetEmail')
-      return EmailType.REMINDER_BUDGET_EMAIL;
+      return 'd-f473bcf2380d4f2ebdc789d4632ac211';
+
     if (emailType === 'paymentNotificationEmail')
       return 'd-c4dbee00cbf74ec8a82f36b1fb064930';
   }
