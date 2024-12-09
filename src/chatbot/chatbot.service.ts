@@ -147,8 +147,11 @@ export class ChatbotService {
       return `Aún no tienes gastos que pueda utilizar para analizarlos. ¡Añade gastos para darte sugerencias!`;
     }
     const insightsContext = `[Instruccion : Eres un bot llamado luca$, no te presentes, debes dar la informacion con mucha educacion y con humor utilizando emojis: ]`;
+    /**Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada,  */
     const response = await this.openAiService.ask(
-      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada, escucha además la petición del cliente y ayudalo a resolver su duda presupuestaria brindando detalles específicos ${text}
+      `${insightsContext} Escucha la petición del cliente y ayudalo a resolver las dudas de su presupuesto brindando detalles específicos ${text}
+      
+      Los datos de su presupuesto son los siguientes: 
       
       Ingresos totales: $${budget.incoming} 
       Datos de Gastos totales por categoría: ${budget.items.map((item) => `${item.category}:${item.amount}`).join(',')} 
@@ -164,7 +167,7 @@ export class ChatbotService {
 
       Si alguna información es erronea nula o ingresa con algún error, simplemente ignorala.
 
-
+      Responde de manera concreta a lo que el cliente te solicita sin irte por las ramas.
        
        `,
     );
