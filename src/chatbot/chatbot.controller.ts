@@ -32,8 +32,9 @@ export class ChatbotController {
     const response = await this.chatbotService.ask(createChatbotDto);
     return res.status(200).json(response);
   }
-  @Get('test')
-  get() {
-    return this.chatbotService.test();
+  @Get('chatbot-history')
+  @Protected()
+  get(@Query('userId') userId: string) {
+    return this.chatbotService.chatbotHistory(userId);
   }
 }

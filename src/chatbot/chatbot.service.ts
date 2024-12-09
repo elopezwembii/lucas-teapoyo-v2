@@ -42,6 +42,9 @@ export class ChatbotService {
   async test() {
     return await this.repository.find();
   }
+  async chatbotHistory(userId: string) {
+    return await this.chatBotModel.find({ userId });
+  }
   async ask({ question, userId, year, month, token }: CreateChatbotDto) {
     if (!question) throw new BadRequestException('El mensaje es requerido.');
 
@@ -90,11 +93,7 @@ export class ChatbotService {
 
     if (normalizedText.includes('presupuesto')) {
       try {
-        console.log({
-          include: normalizedText.includes('presupuesto'),
-          normalizedText,
-        });
-        return await this.showSugerences(token, extraData);
+        return await this.showSugerences(token, extraData, normalizedText);
       } catch (error) {
         console.log({ error });
         return error;
@@ -140,8 +139,8 @@ export class ChatbotService {
   private async showSugerences(
     token: string,
     extraData: { month: number; year: number; userId: number },
+    text: string,
   ) {
-    console.log('buscando...');
     const { budget, fixSpends, variableSpends, debt, savings } =
       await this.retrieveBudgetData(token, extraData);
     if (!budget && !variableSpends.length && !fixSpends.length) {
@@ -149,14 +148,14 @@ export class ChatbotService {
     }
     const insightsContext = `[Instruccion : Eres un bot llamado luca$, no te presentes, debes dar la informacion con mucha educacion y con humor utilizando emojis: ]`;
     const response = await this.openAiService.ask(
-      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada  
+      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada, escucha además la petición del cliente y ayudalo a resolver su duda presupuestaria ${text}
       
       Ingresos totales: $${budget.incoming} 
       Datos de Gastos totales por categoría: ${budget.items.map((item) => `${item.category}:${item.amount}`).join(',')} 
     
      Datos de Gastos variables: ${variableSpends.map((spend) => `${spend.category}:${spend.amount}`).join(',')},
       
-      Datos decGastos fijos: ${fixSpends.map((spend) => `${spend.category}:${spend.amount}`).join(',')}
+      Datos de Gastos fijos: ${fixSpends.map((spend) => `${spend.category}:${spend.amount}`).join(',')}
       
       Datos de Ahorros: ${savings.map((saving) => `Deseo: ${saving.goalDescription} Ahorro proyectado:$${saving.goalAmount} Total Ahorrado: $${saving.raised} Fecha límite ${saving.dateLimit} Tipo de ahorro: ${saving.savingType}`).join(',')}
 
@@ -169,7 +168,7 @@ export class ChatbotService {
        
        `,
     );
-    console.log(response);
+
     return response;
   }
 
