@@ -40,7 +40,7 @@ export class Income {
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'id_usuario' })
-  usuario?: User;
+  usuario?: number;
 
   @Column({ type: 'bigint', nullable: true, name: 'tipo_ingreso' })
   tipoIngreso?: number;

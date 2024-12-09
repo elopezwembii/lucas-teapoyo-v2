@@ -194,7 +194,6 @@ export class JobsService {
   }
 
   @Interval(172800000)
-  // @Cron(CronExpression.EVERY_MINUTE)
   async handleEvery48Hours() {
     const now = new Date();
     const users = await this.userRepository.find();
@@ -247,8 +246,7 @@ export class JobsService {
       });
     });
   }
-  // // @Cron(CronExpression.EVERY_DAY_AT_10AM)
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async sendPaymentNotifications() {
     const date = new Date();
     const paymentNotifications =
@@ -276,60 +274,66 @@ export class JobsService {
       });
     }
   }
-  // // @Cron(CronExpression.EVERY_DAY_AT_3PM)
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_DAY_AT_3PM)
   async checkBudgets() {
     const now = new Date();
     const budgets = await this.budgetRepository.find();
     const notifications = [];
-    for (const budget of budgets) {
-      const budgetItems = await this.budgetItemRepository.find({
-        where: { presupuesto: budget },
-      });
-
-      const totalItems = budgetItems.reduce((acc, curr) => acc + curr.monto, 0);
-
-      const income = await this.incomeRepository.findOne({
-        where: { usuario: budget.usuario },
-      });
-
-      const currentPercent =
-        totalItems > 0 ? (income.montoReal / totalItems) * 100 : 0;
-
-      if (currentPercent >= 50 && currentPercent < 80) {
-        notifications.push(
-          this.sendNotification({
-            from: this.configService.get('ROOT_EMAIL_DOMAIN'),
-            subject: '¡Estás llegando al 50% de tu presupuesto!',
-            to: budget.usuario.email,
-            type: EmailType.BUDGET_EMAIL,
-            dynamicTemplateData: {
-              clientName: budget.usuario.nombres,
-              month: now.getMonth(),
-              year: now.getFullYear(),
-              isFiftyPercentUsed: true,
-              isEightyPercentUsed: false,
-            },
-          }),
+    if (budgets.length)
+      for (const budget of budgets) {
+        const budgetItems = await this.budgetItemRepository.find({
+          where: { presupuesto: budget },
+        });
+        console.log({ budget });
+        const totalItems = budgetItems.reduce(
+          (acc, curr) => acc + curr.monto,
+          0,
         );
-      } else if (currentPercent >= 80) {
-        notifications.push(
-          this.sendNotification({
-            from: this.configService.get('ROOT_EMAIL_DOMAIN'),
-            subject: '¡Estás llegando al 80% de tu presupuesto!',
-            to: budget.usuario.email,
-            type: EmailType.BUDGET_EMAIL,
-            dynamicTemplateData: {
-              clientName: budget.usuario.nombres,
-              month: now.getMonth(),
-              year: now.getFullYear(),
-              isFiftyPercentUsed: false,
-              isEightyPercentUsed: true,
-            },
-          }),
-        );
+
+        const income = await this.incomeRepository.findOne({
+          where: { usuario: budget.usuario },
+        });
+        const user = await this.userRepository.findOne({
+          where: { id: budget.usuario },
+        });
+
+        const currentPercent =
+          totalItems > 0 ? (income.montoReal / totalItems) * 100 : 0;
+
+        if (currentPercent >= 50 && currentPercent < 80) {
+          notifications.push(
+            this.sendNotification({
+              from: this.configService.get('ROOT_EMAIL_DOMAIN'),
+              subject: '¡Estás llegando al 50% de tu presupuesto!',
+              to: user.email,
+              type: EmailType.BUDGET_EMAIL,
+              dynamicTemplateData: {
+                clientName: user.nombres,
+                month: now.getMonth(),
+                year: now.getFullYear(),
+                isFiftyPercentUsed: true,
+                isEightyPercentUsed: false,
+              },
+            }),
+          );
+        } else if (currentPercent >= 80) {
+          notifications.push(
+            this.sendNotification({
+              from: this.configService.get('ROOT_EMAIL_DOMAIN'),
+              subject: '¡Estás llegando al 80% de tu presupuesto!',
+              to: user.email,
+              type: EmailType.BUDGET_EMAIL,
+              dynamicTemplateData: {
+                clientName: user.nombres,
+                month: now.getMonth(),
+                year: now.getFullYear(),
+                isFiftyPercentUsed: false,
+                isEightyPercentUsed: true,
+              },
+            }),
+          );
+        }
       }
-    }
 
     await Promise.all(notifications);
   }

@@ -25,5 +25,8 @@ export class Budget {
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'id_usuario' })
-  usuario?: User;
+  idUsuario?: User;
+
+  @Column({ name: 'id_usuario', type: 'int' })
+  usuario?: number;
 }

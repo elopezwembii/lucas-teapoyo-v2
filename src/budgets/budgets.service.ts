@@ -33,14 +33,14 @@ export class BudgetsService {
       where: {
         mes: month,
         anio: year,
-        usuario: { id: userId },
+        usuario: userId,
       },
       relations: ['items'],
     });
 
     const ingresos = await this.incomeRepository.find({
       where: {
-        usuario: { id: userId },
+        usuario: userId,
         fijar: true,
       },
     });
@@ -67,7 +67,7 @@ export class BudgetsService {
 
     const ingresosFijos = await this.incomeRepository.find({
       where: {
-        usuario: { id: userId },
+        usuario: userId,
         fijar: false,
         mes: month,
         anio: year,
@@ -85,7 +85,7 @@ export class BudgetsService {
       where: {
         mes: currentMonth,
         anio: currentYear,
-        usuario: { id: userId },
+        usuario: userId,
       },
     });
 
@@ -93,7 +93,7 @@ export class BudgetsService {
       where: {
         mes: previousMonth,
         anio: previousYear,
-        usuario: { id: userId },
+        usuario: userId,
       },
     });
 
@@ -146,13 +146,13 @@ export class BudgetsService {
       userId,
       items,
     } = createBudgetDto;
-    console.log({createBudgetDto});
+    console.log({ createBudgetDto });
     // Busca el presupuesto actual
     const currentBudget = await this.budgetRepository.findOne({
       where: {
         mes: currentMonth,
         anio: currentYear,
-        usuario: { id: userId },
+        usuario: userId,
       },
     });
 
@@ -160,7 +160,7 @@ export class BudgetsService {
       where: {
         mes: previousMonth,
         anio: previousYear,
-        usuario: { id: userId },
+        usuario: userId,
       },
     });
 
@@ -211,7 +211,6 @@ export class BudgetsService {
     await this.budgetItemRepository.save(budgetItemsToSave);
     currentBudget.fijado = 1;
     const updatedBudget = await this.budgetRepository.save(currentBudget);
-
 
     return { message: 'Items de presupuesto clonados del mes anterior' };
   }
