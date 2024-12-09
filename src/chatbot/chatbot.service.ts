@@ -148,7 +148,7 @@ export class ChatbotService {
     }
     const insightsContext = `[Instruccion : Eres un bot llamado luca$, no te presentes, debes dar la informacion con mucha educacion y con humor utilizando emojis: ]`;
     const response = await this.openAiService.ask(
-      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada, escucha además la petición del cliente y ayudalo a resolver su duda presupuestaria ${text}
+      `${insightsContext} Analiza los siguientes datos y brinda sugerencias financieras teniendo en cuenta su balance mensual. Añade porcentajes, resúmenes y datos útiles acerca de toda la información aportada, escucha además la petición del cliente y ayudalo a resolver su duda presupuestaria brindando detalles específicos ${text}
       
       Ingresos totales: $${budget.incoming} 
       Datos de Gastos totales por categoría: ${budget.items.map((item) => `${item.category}:${item.amount}`).join(',')} 
