@@ -31,7 +31,8 @@ export class JobsService {
     return await this.mailerService.sendEmail(emailData);
   }
 
-  @Cron('0 0 1 * *')
+  // @Cron('0 0 1 * *')
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async handleStartOfMonth() {
     const now = new Date();
     let budgetItems = null;
@@ -83,7 +84,8 @@ export class JobsService {
     });
   }
 
-  @Cron('0 0 15 * *')
+  // @Cron('0 0 15 * *')
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async handleMidMonth() {
     const now = new Date();
     const users = await this.userRepository.find();
@@ -138,7 +140,8 @@ export class JobsService {
     });
   }
 
-  @Cron('0 0 28-31 * *')
+  // @Cron('0 0 28-31 * *')
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async handleEndOfMonth() {
     const now = new Date();
     let budgetRemaining = 0;
@@ -193,7 +196,8 @@ export class JobsService {
     });
   }
 
-  @Interval(172800000)
+  // @Interval(172800000)
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async handleEvery48Hours() {
     const now = new Date();
     const users = await this.userRepository.find();
