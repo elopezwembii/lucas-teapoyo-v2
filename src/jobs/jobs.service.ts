@@ -85,7 +85,7 @@ export class JobsService {
   }
 
   // @Cron('0 0 15 * *')
-  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  @Cron(CronExpression.EVERY_DAY_AT_11AM)
   async handleMidMonth() {
     const now = new Date();
     const users = await this.userRepository.find();
@@ -141,7 +141,7 @@ export class JobsService {
   }
 
   // @Cron('0 0 28-31 * *')
-  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  @Cron(CronExpression.EVERY_DAY_AT_1PM)
   async handleEndOfMonth() {
     const now = new Date();
     let budgetRemaining = 0;
@@ -197,7 +197,7 @@ export class JobsService {
   }
 
   // @Interval(172800000)
-  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleEvery48Hours() {
     const now = new Date();
     const users = await this.userRepository.find();
@@ -278,7 +278,7 @@ export class JobsService {
       });
     }
   }
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async checkBudgets() {
     const now = new Date();
     const budgets = await this.budgetRepository.find();
@@ -289,22 +289,41 @@ export class JobsService {
           where: { presupuesto: budget },
         });
         console.log({ budget });
-        const totalItems = budgetItems.reduce(
+        const totalItemsAmount = budgetItems.reduce(
           (acc, curr) => acc + curr.monto,
           0,
         );
 
-        const income = await this.incomeRepository.findOne({
-          where: { usuario: budget.usuario },
+        const incomes = await this.incomeRepository.findBy({
+          usuario: budget.usuario,
         });
+        const incomesAmount = incomes.reduce(
+          (acc, curr) => acc + curr.montoReal,
+          0,
+        );
         const user = await this.userRepository.findOne({
           where: { id: budget.usuario },
         });
 
-        const currentPercent =
-          totalItems > 0 ? (income.montoReal / totalItems) * 100 : 0;
-
-        if (currentPercent >= 50 && currentPercent < 80) {
+        let currentPercent = 100;
+        if (incomesAmount > 0 && totalItemsAmount > 0) {
+          currentPercent = (totalItemsAmount / incomesAmount) * 100;
+        }
+        if (incomesAmount > 0 && totalItemsAmount <= 0) {
+          currentPercent = 100;
+        }
+        if (incomesAmount <= 0 && totalItemsAmount <= 0) {
+          currentPercent = 0;
+        }
+        console.log({
+          currentPercent: currentPercent.toFixed(2),
+          totalItems: totalItemsAmount,
+          incomesAmount,
+        });
+        if (
+          Number(currentPercent.toFixed(2)) >= 50 &&
+          Number(currentPercent.toFixed(2)) < 80
+        ) {
           notifications.push(
             this.sendNotification({
               from: this.configService.get('ROOT_EMAIL_DOMAIN'),
@@ -320,7 +339,7 @@ export class JobsService {
               },
             }),
           );
-        } else if (currentPercent >= 80) {
+        } else if (Number(currentPercent.toFixed(2)) >= 80) {
           notifications.push(
             this.sendNotification({
               from: this.configService.get('ROOT_EMAIL_DOMAIN'),
