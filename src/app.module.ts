@@ -48,6 +48,8 @@ import { AuthModule } from './auth/auth.module';
 import { PaymentNotificationsModule } from './payment-notifications/payment-notifications.module';
 import { BudgetsModule } from './budgets/budgets.module';
 import { SavingsModule } from './savings/savings.module';
+import { CmfService } from './cmf/cmf.service';
+import { CmfModule } from './cmf/cmf.module';
 
 @Module({
   imports: [
@@ -113,8 +115,9 @@ import { SavingsModule } from './savings/savings.module';
     PaymentNotificationsModule,
     BudgetsModule,
     SavingsModule,
+    CmfModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CmfService],
 })
 export class AppModule {}
