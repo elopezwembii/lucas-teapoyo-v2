@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression, Interval } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { MailerService } from 'src/mailer/mailer.service';
 import { SendEmailDto } from '../mailer/dto/send-email.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,8 +31,7 @@ export class JobsService {
     return await this.mailerService.sendEmail(emailData);
   }
 
-  // @Cron('0 0 1 * *')
-  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  @Cron('0 0 1 * *')
   async handleStartOfMonth() {
     const now = new Date();
     let budgetItems = null;
@@ -84,7 +83,7 @@ export class JobsService {
     });
   }
 
-  // @Cron('0 0 15 * *')
+  @Cron('0 0 15 * *')
   @Cron(CronExpression.EVERY_DAY_AT_11AM)
   async handleMidMonth() {
     const now = new Date();
@@ -140,8 +139,7 @@ export class JobsService {
     });
   }
 
-  // @Cron('0 0 28-31 * *')
-  @Cron(CronExpression.EVERY_DAY_AT_1PM)
+  @Cron('59 23 L * *')
   async handleEndOfMonth() {
     const now = new Date();
     let budgetRemaining = 0;
@@ -197,7 +195,7 @@ export class JobsService {
   }
 
   // @Interval(172800000)
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron('0 0 */2 * *')
   async handleEvery48Hours() {
     const now = new Date();
     const users = await this.userRepository.find();

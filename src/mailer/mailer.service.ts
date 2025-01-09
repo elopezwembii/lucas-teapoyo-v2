@@ -14,6 +14,7 @@ export class MailerService {
   async sendEmail(emailData: SendEmailDto) {
     sgMail.setApiKey(this.configService.get('SENDGRID_API_KEY'));
     const templateId = this.parseEmailType(emailData.type);
+    console.log({ emailData });
     try {
       return await sgMail.send({
         templateId,
@@ -32,10 +33,8 @@ export class MailerService {
     }
   }
   private parseEmailType(emailType: string) {
-    if (emailType === 'marketingEmail')
-      return 'd-c0f62d6234d94977aee21e20481bcc3d';
     if (emailType === 'budgetEmail')
-      return 'd-f473bcf2380d4f2ebdc789d4632ac211';
+      return 'd-c0f62d6234d94977aee21e20481bcc3d';
     if (emailType === 'reminderBudgetEmail')
       return 'd-f473bcf2380d4f2ebdc789d4632ac211';
 
