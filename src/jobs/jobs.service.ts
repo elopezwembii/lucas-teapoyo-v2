@@ -278,7 +278,7 @@ export class JobsService {
       });
     }
   }
-  @Cron(CronExpression.EVERY_DAY_AT_3PM)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async checkBudgets() {
     const now = new Date();
     const budgets = await this.budgetRepository.find();
