@@ -36,7 +36,6 @@ export class JobsService {
     const now = new Date();
     const currentDay = now.getDay();
     //Set at three days to notify in the month
-
     if (currentDay === 1 && currentDay < 5) {
       let budgetItems = null;
       let budgetTotalSpends = 0;
@@ -294,6 +293,8 @@ export class JobsService {
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async checkBudgets() {
     const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
     const budgets = await this.budgetRepository.find();
     const notifications = [];
     if (budgets.length)
@@ -301,7 +302,7 @@ export class JobsService {
         const budgetItems = await this.budgetItemRepository.find({
           where: { presupuesto: budget },
         });
-        console.log({ budget });
+
         const totalItemsAmount = budgetItems.reduce(
           (acc, curr) => acc + curr.monto,
           0,
@@ -328,11 +329,7 @@ export class JobsService {
         if (incomesAmount <= 0 && totalItemsAmount <= 0) {
           currentPercent = 0;
         }
-        console.log({
-          currentPercent: currentPercent.toFixed(2),
-          totalItems: totalItemsAmount,
-          incomesAmount,
-        });
+
         if (
           Number(currentPercent.toFixed(2)) >= 50 &&
           Number(currentPercent.toFixed(2)) < 80
@@ -345,8 +342,8 @@ export class JobsService {
               type: EmailType.BUDGET_EMAIL,
               dynamicTemplateData: {
                 clientName: user.nombres,
-                month: now.getMonth(),
-                year: now.getFullYear(),
+                month: currentMonth,
+                year: currentYear,
                 isFiftyPercentUsed: true,
                 isEightyPercentUsed: false,
               },
