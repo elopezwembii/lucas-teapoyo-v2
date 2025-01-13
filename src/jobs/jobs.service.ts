@@ -31,170 +31,185 @@ export class JobsService {
     return await this.mailerService.sendEmail(emailData);
   }
 
-  @Cron('0 0 1 * *')
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleStartOfMonth() {
     const now = new Date();
-    let budgetItems = null;
-    let budgetTotalSpends = 0;
-    let budgetTotalAmount = 0;
-    const users = await this.userRepository.find();
-    const monthlyBudget = await this.budgetRepository.findOne({
-      where: {
-        anio: now.getFullYear(),
-        mes: now.getMonth(),
-      },
-    });
-    if (monthlyBudget !== null) {
-      budgetItems = await this.budgetItemRepository.find({
+    const currentDay = now.getDay();
+    //Set at three days to notify in the month
+
+    if (currentDay === 1 && currentDay < 5) {
+      let budgetItems = null;
+      let budgetTotalSpends = 0;
+      let budgetTotalAmount = 0;
+      const users = await this.userRepository.find();
+      const monthlyBudget = await this.budgetRepository.findOne({
         where: {
-          idPresupuesto: monthlyBudget.id,
+          anio: now.getFullYear(),
+          mes: now.getMonth(),
         },
       });
-      budgetTotalSpends = budgetItems.reduce(
-        (acc, acum) => acc + acum.monto,
-        0,
-      );
-    }
+      if (monthlyBudget !== null) {
+        budgetItems = await this.budgetItemRepository.find({
+          where: {
+            idPresupuesto: monthlyBudget.id,
+          },
+        });
+        budgetTotalSpends = budgetItems.reduce(
+          (acc, acum) => acc + acum.monto,
+          0,
+        );
+      }
 
-    const incomes = await this.incomeRepository.find({
-      where: {
-        anio: now.getFullYear(),
-        mes: now.getMonth(),
-      },
-    });
-    budgetTotalAmount = incomes.reduce((acc, acum) => acc + acum.montoReal, 0);
-
-    const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
-    return users.map(async (user) => {
-      return await this.sendNotification({
-        from: this.configService.get('ROOT_EMAIL_DOMAIN'),
-        subject: '¡Inicio de mes! Revisa tu presupuesto.',
-        to: user.email,
-        type: EmailType.REMINDER_BUDGET_EMAIL,
-        dynamicTemplateData: {
-          clientName: user.nombres,
-          month: now.getMonth(),
-          year: now.getFullYear(),
-          budgetTotalAmount,
-          budgetTotalSpends,
-          budgetRemaining,
-        },
-      });
-    });
-  }
-
-  @Cron('0 0 15 * *')
-  @Cron(CronExpression.EVERY_DAY_AT_11AM)
-  async handleMidMonth() {
-    const now = new Date();
-    const users = await this.userRepository.find();
-    let budgetRemaining = 0;
-    let budgetTotalAmount = 0;
-    let budgetTotalSpends = null;
-    const monthlyBudget = await this.budgetRepository.findOne({
-      where: {
-        anio: now.getFullYear(),
-        mes: now.getMonth(),
-      },
-    });
-    const incomes = await this.incomeRepository.find({
-      where: {
-        anio: now.getFullYear(),
-        mes: now.getMonth(),
-      },
-    });
-    if (monthlyBudget !== null) {
-      const budgetTotalAmount = incomes.reduce(
-        (acc, acum) => acc + acum.montoReal,
-        0,
-      );
-      const budgetItems = await this.budgetItemRepository.find({
+      const incomes = await this.incomeRepository.find({
         where: {
-          idPresupuesto: monthlyBudget.id,
+          anio: now.getFullYear(),
+          mes: now.getMonth(),
         },
       });
-
-      const budgetTotalSpends = budgetItems.reduce(
-        (acc, acum) => acc + acum.monto,
-        0,
-      );
-      budgetRemaining = budgetTotalAmount - budgetTotalSpends;
-    }
-    return users.map(async (user) => {
-      return await this.sendNotification({
-        from: this.configService.get('ROOT_EMAIL_DOMAIN'),
-        subject:
-          '¡Mitad de mes! Es un buen momento para revisar tu presupuesto.',
-        to: user.email,
-        type: EmailType.REMINDER_BUDGET_EMAIL,
-        dynamicTemplateData: {
-          clientName: user.nombres,
-          month: now.getMonth(),
-          year: now.getFullYear(),
-          budgetTotalAmount,
-          budgetTotalSpends,
-          budgetRemaining,
-        },
-      });
-    });
-  }
-
-  @Cron('59 23 1 * *')
-  async handleEndOfMonth() {
-    const now = new Date();
-    let budgetRemaining = 0;
-    let budgetTotalAmount = 0;
-    let budgetTotalSpends = null;
-    const users = await this.userRepository.find();
-    const monthlyBudget = await this.budgetRepository.findOne({
-      where: {
-        anio: now.getFullYear(),
-        mes: now.getMonth(),
-      },
-    });
-    const incomes = await this.incomeRepository.find({
-      where: {
-        anio: now.getFullYear(),
-        mes: now.getMonth(),
-      },
-    });
-    if (monthlyBudget !== null) {
       budgetTotalAmount = incomes.reduce(
         (acc, acum) => acc + acum.montoReal,
         0,
       );
-      const budgetItems = await this.budgetItemRepository.find({
-        where: {
-          idPresupuesto: monthlyBudget.id,
-        },
-      });
 
-      budgetTotalSpends = budgetItems.reduce(
-        (acc, acum) => acc + acum.monto,
-        0,
-      );
-      budgetRemaining = budgetTotalAmount - budgetTotalSpends;
-    }
-    return users.map(async (user) => {
-      return await this.sendNotification({
-        from: this.configService.get('ROOT_EMAIL_DOMAIN'),
-        subject:
-          '¡Fin de mes! Asegúrate de que tu presupuesto esté actualizado.',
-        to: user.email,
-        type: EmailType.REMINDER_BUDGET_EMAIL,
-        dynamicTemplateData: {
-          clientName: user.nombres,
-          month: now.getMonth(),
-          year: now.getFullYear(),
-          budgetTotalAmount,
-          budgetTotalSpends,
-          budgetRemaining,
-        },
+      const budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+      return users.map(async (user) => {
+        return await this.sendNotification({
+          from: this.configService.get('ROOT_EMAIL_DOMAIN'),
+          subject: '¡Inicio de mes! Revisa tu presupuesto.',
+          to: user.email,
+          type: EmailType.REMINDER_BUDGET_EMAIL,
+          dynamicTemplateData: {
+            clientName: user.nombres,
+            month: now.getMonth(),
+            year: now.getFullYear(),
+            budgetTotalAmount,
+            budgetTotalSpends,
+            budgetRemaining,
+          },
+        });
       });
-    });
+    }
   }
 
-  // @Interval(172800000)
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  async handleMidMonth() {
+    const now = new Date();
+    const currentDay = now.getDay();
+    //Set at three days to notify in the month
+    if (currentDay == 15 && currentDay < 18) {
+      const users = await this.userRepository.find();
+      let budgetRemaining = 0;
+      let budgetTotalAmount = 0;
+      let budgetTotalSpends = null;
+      const monthlyBudget = await this.budgetRepository.findOne({
+        where: {
+          anio: now.getFullYear(),
+          mes: now.getMonth(),
+        },
+      });
+      const incomes = await this.incomeRepository.find({
+        where: {
+          anio: now.getFullYear(),
+          mes: now.getMonth(),
+        },
+      });
+      if (monthlyBudget !== null) {
+        const budgetTotalAmount = incomes.reduce(
+          (acc, acum) => acc + acum.montoReal,
+          0,
+        );
+        const budgetItems = await this.budgetItemRepository.find({
+          where: {
+            idPresupuesto: monthlyBudget.id,
+          },
+        });
+
+        const budgetTotalSpends = budgetItems.reduce(
+          (acc, acum) => acc + acum.monto,
+          0,
+        );
+        budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+      }
+      return users.map(async (user) => {
+        return await this.sendNotification({
+          from: this.configService.get('ROOT_EMAIL_DOMAIN'),
+          subject:
+            '¡Mitad de mes! Es un buen momento para revisar tu presupuesto.',
+          to: user.email,
+          type: EmailType.REMINDER_BUDGET_EMAIL,
+          dynamicTemplateData: {
+            clientName: user.nombres,
+            month: now.getMonth(),
+            year: now.getFullYear(),
+            budgetTotalAmount,
+            budgetTotalSpends,
+            budgetRemaining,
+          },
+        });
+      });
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  async handleEndOfMonth() {
+    const now = new Date();
+    const currentDay = now.getDay();
+    //Set at three days to notify in the month
+
+    if (currentDay === 28 && currentDay <= 31) {
+      let budgetRemaining = 0;
+      let budgetTotalAmount = 0;
+      let budgetTotalSpends = null;
+      const users = await this.userRepository.find();
+      const monthlyBudget = await this.budgetRepository.findOne({
+        where: {
+          anio: now.getFullYear(),
+          mes: now.getMonth(),
+        },
+      });
+      const incomes = await this.incomeRepository.find({
+        where: {
+          anio: now.getFullYear(),
+          mes: now.getMonth(),
+        },
+      });
+      if (monthlyBudget !== null) {
+        budgetTotalAmount = incomes.reduce(
+          (acc, acum) => acc + acum.montoReal,
+          0,
+        );
+        const budgetItems = await this.budgetItemRepository.find({
+          where: {
+            idPresupuesto: monthlyBudget.id,
+          },
+        });
+
+        budgetTotalSpends = budgetItems.reduce(
+          (acc, acum) => acc + acum.monto,
+          0,
+        );
+        budgetRemaining = budgetTotalAmount - budgetTotalSpends;
+      }
+      return users.map(async (user) => {
+        return await this.sendNotification({
+          from: this.configService.get('ROOT_EMAIL_DOMAIN'),
+          subject:
+            '¡Fin de mes! Asegúrate de que tu presupuesto esté actualizado.',
+          to: user.email,
+          type: EmailType.REMINDER_BUDGET_EMAIL,
+          dynamicTemplateData: {
+            clientName: user.nombres,
+            month: now.getMonth(),
+            year: now.getFullYear(),
+            budgetTotalAmount,
+            budgetTotalSpends,
+            budgetRemaining,
+          },
+        });
+      });
+    }
+  }
+
   @Interval(48 * 60 * 60 * 1000)
   async handleEvery48Hours() {
     const now = new Date();
@@ -276,7 +291,7 @@ export class JobsService {
       });
     }
   }
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async checkBudgets() {
     const now = new Date();
     const budgets = await this.budgetRepository.find();
